@@ -1,0 +1,318 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Type scale — DESIGN_SYSTEM.md §2.2. Weight is applied separately via
+   font-semibold/font-bold so each size stays composable. */
+@theme {
+  --text-display: 2.25rem;
+  --text-display--line-height: 2.75rem;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.875rem;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.625rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-body-sm: 0.8125rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-score-xl: 3.5rem;
+  --text-score-xl--line-height: 3.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Kredal risk semantics — DESIGN_SYSTEM.md §2.1. Fixed meaning: never used decoratively. */
+  --color-risk-low: var(--risk-low);
+  --color-risk-low-foreground: var(--risk-low-foreground);
+  --color-risk-low-bg: var(--risk-low-bg);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-medium-foreground: var(--risk-medium-foreground);
+  --color-risk-medium-bg: var(--risk-medium-bg);
+  --color-risk-high: var(--risk-high);
+  --color-risk-high-foreground: var(--risk-high-foreground);
+  --color-risk-high-bg: var(--risk-high-bg);
+
+  /* Functional semantics — DESIGN_SYSTEM.md §2.1 */
+  --color-info: var(--info);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --ease-out-kredal: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root {
+  /* Neutrals — slate ramp */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  /* Primary — Kredal Navy */
+  --primary: #1e3a8a;
+  --primary-foreground: #f8fafc;
+  --secondary: #eff3fc;
+  --secondary-foreground: #1e3a8a;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --accent: #dbe4f8;
+  --accent-foreground: #172e6e;
+
+  --destructive: #b91c1c;
+  --destructive-foreground: #fef2f2;
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #1e3a8a;
+
+  /* Chart palette — categorical, color-blind-safe order */
+  --chart-1: #1e3a8a;
+  --chart-2: #0e7490;
+  --chart-3: #7c3aed;
+  --chart-4: #b45309;
+  --chart-5: #475569;
+
+  --radius: 0.625rem;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #1e3a8a;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #1e3a8a;
+
+  /* Risk semantics — light theme */
+  --risk-low: #047857;
+  --risk-low-foreground: #065f46;
+  --risk-low-bg: #ecfdf5;
+  --risk-medium: #b45309;
+  --risk-medium-foreground: #92400e;
+  --risk-medium-bg: #fffbeb;
+  --risk-high: #b91c1c;
+  --risk-high-foreground: #991b1b;
+  --risk-high-bg: #fef2f2;
+
+  /* Functional semantics — light theme */
+  --info: #1d4ed8;
+  --success: #047857;
+  --warning: #b45309;
+}
+
+.dark {
+  --background: #0b1120;
+  --foreground: #f1f5f9;
+  --card: #111827;
+  --card-foreground: #f1f5f9;
+  --popover: #111827;
+  --popover-foreground: #f1f5f9;
+
+  --primary: #3155b4;
+  --primary-foreground: #f8fafc;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e2c4d;
+  --accent-foreground: #dbe4f8;
+
+  --destructive: #f87171;
+  --destructive-foreground: #450a0a;
+
+  --border: #293548;
+  --input: #293548;
+  --ring: #3155b4;
+
+  --chart-1: #6d8bde;
+  --chart-2: #22d3ee;
+  --chart-3: #a78bfa;
+  --chart-4: #fbbf24;
+  --chart-5: #94a3b8;
+
+  --sidebar: #111827;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #3155b4;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #293548;
+  --sidebar-ring: #3155b4;
+
+  /* Risk semantics — dark theme */
+  --risk-low: #34d399;
+  --risk-low-foreground: #052e21;
+  --risk-low-bg: #05230f;
+  --risk-medium: #fbbf24;
+  --risk-medium-foreground: #2a1c02;
+  --risk-medium-bg: #241a00;
+  --risk-high: #f87171;
+  --risk-high-foreground: #2f0a0a;
+  --risk-high-bg: #240808;
+
+  /* Functional semantics — dark theme */
+  --info: #60a5fa;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .kredal-score-xl {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Report preview — DESIGN_SYSTEM.md §3 "Report preview". Manual styling
+   instead of a typography plugin, keyed to our own tokens. */
+.markdown-report {
+  max-width: 42rem;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--foreground);
+}
+.markdown-report > :first-child {
+  margin-top: 0;
+}
+.markdown-report h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-report h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.markdown-report p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.markdown-report ul,
+.markdown-report ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-inline-start: 1.25rem;
+}
+.markdown-report li {
+  margin-top: 0.25rem;
+}
+.markdown-report ul {
+  list-style-type: disc;
+}
+.markdown-report ol {
+  list-style-type: decimal;
+}
+.markdown-report blockquote {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--text-body-sm);
+  border-inline-start: 3px solid var(--primary);
+}
+.markdown-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: var(--text-body-sm);
+}
+.markdown-report th,
+.markdown-report td {
+  border: 1px solid var(--border);
+  padding: 0.375rem 0.625rem;
+  text-align: start;
+}
+.markdown-report th {
+  background: var(--muted);
+  font-weight: 600;
+}
+.markdown-report strong {
+  font-weight: 600;
+}
+.markdown-report input[type="checkbox"] {
+  margin-inline-end: 0.5rem;
+}
