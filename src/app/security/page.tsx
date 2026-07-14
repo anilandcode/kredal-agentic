@@ -43,6 +43,14 @@ export default function SecurityPage() {
           <Link href="/pricing" className="text-muted-foreground hover:text-foreground">
             Pricing
           </Link>
+          <a
+            href="https://docs-site-henna-eight.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Docs
+          </a>
           <Link href="/login" className="text-muted-foreground hover:text-foreground">
             Sign in
           </Link>

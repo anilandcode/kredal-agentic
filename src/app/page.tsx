@@ -35,6 +35,15 @@ export default function Home() {
           <Button variant="ghost" asChild className="hidden sm:inline-flex">
             <Link href="/security">Security</Link>
           </Button>
+          <Button variant="ghost" asChild className="hidden sm:inline-flex">
+            <a
+              href="https://docs-site-henna-eight.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Docs
+            </a>
+          </Button>
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
@@ -91,6 +100,14 @@ export default function Home() {
         <nav className="flex items-center gap-4 text-caption text-muted-foreground">
           <Link href="/pricing" className="hover:text-foreground">Pricing</Link>
           <Link href="/security" className="hover:text-foreground">Security</Link>
+          <a
+            href="https://docs-site-henna-eight.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground"
+          >
+            Docs
+          </a>
         </nav>
         <p className="text-caption text-muted-foreground">
           &copy; {new Date().getFullYear()} Kredal. UAE SME bank-readiness
