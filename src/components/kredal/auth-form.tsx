@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Link from "next/link";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,9 @@ const initialState: AuthActionState = {};
 
 export function AuthForm({ mode, action, next }: AuthFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  // Controlled so a failed submit doesn't wipe the field (React 19 resets
+  // uncontrolled inputs when the form action settles).
+  const [email, setEmail] = useState("");
   const isSignup = mode === "signup";
 
   return (
@@ -47,11 +51,23 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
           autoComplete="email"
           required
           placeholder="you@company.ae"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          {!isSignup ? (
+            <Link
+              href="/forgot-password"
+              className="text-caption font-medium text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          ) : null}
+        </div>
         <Input
           id="password"
           name="password"

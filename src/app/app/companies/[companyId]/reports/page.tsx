@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, FileText, Gauge, Sparkles } from "lucide-react";
+import { ArrowLeft, ClipboardList, FileText, Gauge, RotateCcw, Sparkles } from "lucide-react";
 import { SubmitButton } from "@/components/kredal/submit-button";
 import { EmptyState } from "@/components/kredal/empty-state";
 import { DisclaimerBanner } from "@/components/kredal/disclaimer-banner";
@@ -92,6 +92,31 @@ export default async function ReportsPage({
               A document-prepared pack ready to bring to the bank.
             </p>
             <form action={generateReport.bind(null, companyId, "bank_application_pack")}>
+              <SubmitButton size="sm" variant="secondary">
+                Generate
+              </SubmitButton>
+            </form>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-5">
+            <ClipboardList className="mb-2 h-5 w-5 text-primary" strokeWidth={1.5} />
+            <h2 className="text-h3 font-semibold">Consultant checklist</h2>
+            <p className="mb-4 text-body-sm text-muted-foreground">
+              Per-document status and client blockers — for advisors managing
+              this file.
+            </p>
+            <form action={generateReport.bind(null, companyId, "consultant_checklist")}>
+              <SubmitButton size="sm" variant="secondary">
+                Generate
+              </SubmitButton>
+            </form>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-5">
+            <RotateCcw className="mb-2 h-5 w-5 text-primary" strokeWidth={1.5} />
+            <h2 className="text-h3 font-semibold">Rejection recovery pack</h2>
+            <p className="mb-4 text-body-sm text-muted-foreground">
+              Fixes and a resubmission letter skeleton after a bank said no.
+            </p>
+            <form action={generateReport.bind(null, companyId, "rejection_recovery_pack")}>
               <SubmitButton size="sm" variant="secondary">
                 Generate
               </SubmitButton>

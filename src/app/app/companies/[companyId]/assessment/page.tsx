@@ -7,9 +7,10 @@ import { RiskCard } from "@/components/kredal/risk-card";
 import { EmptyState } from "@/components/kredal/empty-state";
 import { SubmitButton } from "@/components/kredal/submit-button";
 import { DisclaimerBanner } from "@/components/kredal/disclaimer-banner";
+import { AssessmentHistory } from "@/components/kredal/assessment-history";
 import { runReadinessAssessment } from "@/app/actions/assessment";
 import { getCompany } from "@/lib/data/companies";
-import { getLatestAssessment } from "@/lib/data/assessments";
+import { getAssessments } from "@/lib/data/assessments";
 import type { ReadinessFlag } from "@/lib/types";
 
 export default async function AssessmentPage({
@@ -21,7 +22,9 @@ export default async function AssessmentPage({
   const company = await getCompany(companyId);
   if (!company) notFound();
 
-  const assessment = await getLatestAssessment(companyId);
+  const assessments = await getAssessments(companyId);
+  const assessment = assessments[0] ?? null;
+  const history = assessments.slice(1);
   const runAssessment = runReadinessAssessment.bind(null, companyId);
 
   return (
@@ -112,6 +115,8 @@ export default async function AssessmentPage({
               </Link>
             </div>
           </div>
+
+          <AssessmentHistory assessments={history} />
         </div>
       )}
     </div>

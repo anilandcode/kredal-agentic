@@ -1,9 +1,11 @@
-import { CheckCircle2, Circle, Clock, ExternalLink } from "lucide-react";
+import { CheckCircle2, Circle, Clock, ExternalLink, ScanText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/constants";
 import { DocumentUploadForm } from "@/components/kredal/document-upload-form";
 import { DeleteDocumentButton } from "@/components/kredal/delete-document-button";
 import { uploadDocument, createSignedDocumentUrl } from "@/app/actions/documents";
+import { extractDocument } from "@/app/actions/extraction";
+import { isExtractable } from "@/lib/ai/extraction";
 import type { CompanyDocument, DocumentStatus, DocumentType } from "@/lib/types";
 
 const STATUS_STYLES: Record<DocumentStatus, string> = {
@@ -93,6 +95,11 @@ export function DocumentCard({
                   >
                     {STATUS_LABELS[doc.status]}
                   </span>
+                  {doc.extracted_text && doc.parse_confidence != null ? (
+                    <span className="tabular-nums">
+                      AI {Math.round(Number(doc.parse_confidence) * 100)}%
+                    </span>
+                  ) : null}
                   {isExpiringSoon(doc.expiry_date) ? (
                     <span className="flex items-center gap-1 font-medium text-risk-medium">
                       <Clock className="h-3 w-3" strokeWidth={1.5} />
@@ -102,6 +109,18 @@ export function DocumentCard({
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {isExtractable(documentType) ? (
+                  <form action={extractDocument.bind(null, companyId, doc.id)}>
+                    <button
+                      type="submit"
+                      aria-label={`Extract data from ${doc.original_filename} with AI`}
+                      title={doc.extracted_text ? "Re-extract with AI" : "Extract with AI"}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      <ScanText className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
+                  </form>
+                ) : null}
                 <form action={createSignedDocumentUrl.bind(null, doc.storage_path)}>
                   <button
                     type="submit"

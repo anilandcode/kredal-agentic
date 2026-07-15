@@ -5,16 +5,16 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
 import {
-  buildBankApplicationPackReport,
-  buildFounderReadinessReport,
+  buildReport,
   reportTitle,
+  type BuildableReportType,
 } from "@/lib/reports/templates";
 import { getCompany, getCompanyOwners } from "@/lib/data/companies";
 import { getCompanyDocuments } from "@/lib/data/documents";
 import { getQuestionnaireAnswers } from "@/lib/data/questionnaire";
 import { getLatestAssessment } from "@/lib/data/assessments";
 
-export type GeneratableReportType = "founder_readiness" | "bank_application_pack";
+export type GeneratableReportType = BuildableReportType;
 
 /** TECH_SPEC.md §10 — generateReport. */
 export async function generateReport(
@@ -40,10 +40,7 @@ export async function generateReport(
   ]);
 
   const data = { company, owners, documents, assessment, answers };
-  const content =
-    reportType === "bank_application_pack"
-      ? buildBankApplicationPackReport(data)
-      : buildFounderReadinessReport(data);
+  const content = buildReport(reportType, data);
 
   const { data: report, error } = await supabase
     .from("reports")

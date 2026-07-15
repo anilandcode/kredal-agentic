@@ -5,13 +5,13 @@ import { CreateWorkspaceForm } from "@/components/kredal/create-workspace-form";
 import { CompanySearchTable } from "@/components/kredal/company-search-table";
 import { StatTile } from "@/components/kredal/stat-tile";
 import { EmptyState } from "@/components/kredal/empty-state";
-import { getUserWorkspaces } from "@/lib/data/workspaces";
+import { getActiveWorkspace } from "@/lib/data/workspaces";
 import { getWorkspaceCompanySummaries } from "@/lib/data/companies";
 
 export default async function DashboardPage() {
-  const workspaces = await getUserWorkspaces();
+  const workspace = await getActiveWorkspace();
 
-  if (workspaces.length === 0) {
+  if (!workspace) {
     return (
       <div className="mx-auto max-w-md space-y-6 py-12">
         <div className="space-y-1.5 text-center">
@@ -28,7 +28,6 @@ export default async function DashboardPage() {
     );
   }
 
-  const workspace = workspaces[0];
   const isConsultant = workspace.workspace_type === "consultant";
   const companies = await getWorkspaceCompanySummaries(workspace.id);
 

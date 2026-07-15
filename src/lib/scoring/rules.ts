@@ -101,6 +101,89 @@ function uboOwner(owners: CompanyOwner[]): CompanyOwner | undefined {
 const HIGH_MIN_BALANCE_BANKS = new Set(["Mashreq", "Emirates NBD", "FAB", "ADCB"]);
 const GENERIC_ACTIVITY_PHRASES = ["general trading", "trading", "consulting", "services"];
 
+/**
+ * Bank-specific document additions — LIVING DATA refined from research and
+ * discovery calls. Single source of truth: the checklist UI consumes this via
+ * `src/lib/checklist.ts`, and the `bank_required_doc_missing` rule scores
+ * against it, so the interface and the score cannot diverge.
+ * (Defined here, not imported: this catalog must stay loadable in plain Node
+ * for the docs generator.)
+ */
+export const BANK_ADDITIONAL_REQUIRED: Record<string, string[]> = {
+  "Wio Bank": [],
+  Mashreq: ["bank_statement", "invoice_or_contract"],
+  "Emirates NBD": ["moa_aoa", "bank_statement"],
+  RAKBANK: ["invoice_or_contract"],
+  ADCB: ["moa_aoa", "bank_statement"],
+  FAB: ["moa_aoa", "bank_statement", "source_of_funds_evidence"],
+  ADIB: ["moa_aoa", "source_of_funds_evidence"],
+};
+
+function missingBankDocs(i: ScoringInput): string[] {
+  const bank = i.company.target_bank;
+  if (!bank) return [];
+  const extra = BANK_ADDITIONAL_REQUIRED[bank] ?? [];
+  return extra.filter((t) => !hasDoc(i.documents, t));
+}
+
+// ---- AI-extracted data helpers (inlined; this catalog must stay free of
+// value imports so the docs generator can load it in plain Node) ----
+
+interface ExtractedFields {
+  doc?: string;
+  legal_name?: string | null;
+  full_name?: string | null;
+  expiry_date?: string | null;
+  [key: string]: unknown;
+}
+
+/** First non-rejected document of a type that has parsed extraction data. */
+function extractedDoc(
+  documents: CompanyDocument[],
+  type: string
+): ExtractedFields | null {
+  for (const d of documents) {
+    if (d.document_type !== type || d.status === "rejected" || !d.extracted_text)
+      continue;
+    try {
+      const obj = JSON.parse(d.extracted_text);
+      if (obj && typeof obj === "object" && obj.doc === type)
+        return obj as ExtractedFields;
+    } catch {
+      /* unparseable extraction — ignore */
+    }
+  }
+  return null;
+}
+
+/** Loose, order-tolerant name comparison. True unless a clear disagreement. */
+function namesRoughlyMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (!a || !b) return true;
+  const tokens = (s: string) =>
+    s
+      .normalize("NFKD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/\b(llc|l\.l\.c|fzc|fze|fz-llc|ltd|limited|est|establishment|trading|general)\b/g, " ")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((t) => t.length > 1);
+  const ta = new Set(tokens(a));
+  const tb = new Set(tokens(b));
+  if (ta.size === 0 || tb.size === 0) return true;
+  const smaller = ta.size <= tb.size ? ta : tb;
+  const larger = ta.size <= tb.size ? tb : ta;
+  let overlap = 0;
+  for (const t of smaller) if (larger.has(t)) overlap++;
+  return overlap / smaller.size >= 0.5;
+}
+
+function isPastDate(iso: string | null | undefined): boolean {
+  if (!iso) return false;
+  const t = new Date(iso).getTime();
+  return !Number.isNaN(t) && t < Date.now();
+}
+
 // ---- rules (evaluation order per category preserved from the original engine) ----
 
 export const SCORING_RULES: ScoringRule[] = [
@@ -336,6 +419,19 @@ export const SCORING_RULES: ScoringRule[] = [
       return m !== null && m < 3;
     },
   },
+  {
+    id: "bank_required_doc_missing",
+    category: "bank_fit",
+    points: 4,
+    severity: "medium",
+    issue: "The selected bank expects additional documents that are not uploaded yet.",
+    fix: "Upload the documents your target bank specifically expects — they are marked as required on your checklist.",
+    when: (i) => missingBankDocs(i).length > 0,
+    issueFor: (i) =>
+      `${i.company.target_bank} additionally expects: ${missingBankDocs(i)
+        .map((t) => t.replace(/_/g, " "))
+        .join(", ")}.`,
+  },
 
   // UAE founder/company history — 10 points
   {
@@ -414,5 +510,55 @@ export const SCORING_RULES: ScoringRule[] = [
       const w = str(i.answers.wps_status);
       return hasEmployees && (!w || w === "unknown");
     },
+  },
+
+  // AI cross-document consistency — deterministic comparisons over
+  // AI-extracted document fields. Fire only when extraction data exists.
+  {
+    id: "xdoc_license_name_mismatch",
+    category: "ownership_consistency",
+    points: 6,
+    severity: "high",
+    issue: "The company name on the uploaded trade license does not match the profile.",
+    fix: "Make the company profile's legal name match the trade license exactly, or upload the correct license.",
+    when: (i) => {
+      const tl = extractedDoc(i.documents, "trade_license");
+      return !!tl?.legal_name && !namesRoughlyMatch(tl.legal_name, i.company.legal_name);
+    },
+    issueFor: (i) => {
+      const tl = extractedDoc(i.documents, "trade_license");
+      return `Trade license reads "${tl?.legal_name}" but the profile says "${i.company.legal_name}" — banks reject on exactly this inconsistency.`;
+    },
+  },
+  {
+    id: "xdoc_passport_name_mismatch",
+    category: "ownership_consistency",
+    points: 5,
+    severity: "high",
+    issue: "The uploaded passport's name does not match any listed owner.",
+    fix: "Add the passport holder as an owner, or correct the owner's name to match the passport exactly.",
+    when: (i) => {
+      const pp = extractedDoc(i.documents, "owner_passport");
+      if (!pp?.full_name || i.owners.length === 0) return false;
+      return !i.owners.some((o) => namesRoughlyMatch(pp.full_name, o.full_name));
+    },
+  },
+  {
+    id: "xdoc_license_expired",
+    category: "document_completeness",
+    points: 6,
+    severity: "high",
+    issue: "The uploaded trade license has expired.",
+    fix: "Renew the trade license and upload the current one — banks will not open an account against an expired license.",
+    when: (i) => isPastDate(extractedDoc(i.documents, "trade_license")?.expiry_date),
+  },
+  {
+    id: "xdoc_passport_expired",
+    category: "document_completeness",
+    points: 5,
+    severity: "high",
+    issue: "The uploaded owner passport has expired.",
+    fix: "Renew the passport and upload the current copy before applying.",
+    when: (i) => isPastDate(extractedDoc(i.documents, "owner_passport")?.expiry_date),
   },
 ];

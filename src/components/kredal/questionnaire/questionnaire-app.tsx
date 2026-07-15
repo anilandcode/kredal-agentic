@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SectionNav } from "@/components/kredal/questionnaire/section-nav";
 import { SectionForm } from "@/components/kredal/questionnaire/section-form";
 import { OwnersManager } from "@/components/kredal/questionnaire/owners-manager";
+import { AiDraftAssist } from "@/components/kredal/questionnaire/ai-draft-assist";
 import { saveQuestionnaireSection } from "@/app/actions/questionnaire";
 import { QUESTIONNAIRE_SCHEMA, getSectionTitle } from "@/lib/questionnaire/schema";
 import { QUESTIONNAIRE_SECTIONS, type QuestionnaireSectionKey } from "@/lib/constants";
@@ -59,13 +60,21 @@ export function QuestionnaireApp({
             </div>
           </div>
         ) : (
-          <SectionForm
-            key={activeSection}
-            questions={QUESTIONNAIRE_SCHEMA[activeSection]}
-            answers={answers}
-            action={saveQuestionnaireSection.bind(null, companyId, activeSection)}
-            onSaved={markSavedAndAdvance}
-          />
+          <div>
+            {activeSection === "source_of_funds" ? (
+              <AiDraftAssist
+                companyId={companyId}
+                targetFieldId="source_of_funds_explanation"
+              />
+            ) : null}
+            <SectionForm
+              key={activeSection}
+              questions={QUESTIONNAIRE_SCHEMA[activeSection]}
+              answers={answers}
+              action={saveQuestionnaireSection.bind(null, companyId, activeSection)}
+              onSaved={markSavedAndAdvance}
+            />
+          </div>
         )}
       </div>
     </div>

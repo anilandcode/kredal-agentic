@@ -15,10 +15,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  title: "Kredal — UAE SME Bank-Readiness",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Kredal — UAE SME Bank-Readiness",
+    template: "%s — Kredal",
+  },
   description:
     "Upload your UAE company documents. Kredal shows why a bank may reject your file, what to fix, and generates a bank-ready application pack.",
+  openGraph: {
+    title: "Kredal — UAE SME Bank-Readiness",
+    description:
+      "Know why a UAE bank would reject your business account file — before you apply.",
+    url: siteUrl,
+    siteName: "Kredal",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kredal — UAE SME Bank-Readiness",
+    description:
+      "Know why a UAE bank would reject your business account file — before you apply.",
+  },
 };
 
 export default function RootLayout({

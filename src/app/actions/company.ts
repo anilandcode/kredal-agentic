@@ -94,3 +94,31 @@ export async function updateCompany(
   revalidatePath("/app");
   redirect(`/app/companies/${companyId}`);
 }
+
+export async function archiveCompany(companyId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: company, error } = await supabase
+    .from("companies")
+    .update({ status: "archived" as CompanyStatus })
+    .eq("id", companyId)
+    .select("workspace_id, legal_name")
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  await logAuditEvent(supabase, {
+    userId: user.id,
+    workspaceId: company.workspace_id,
+    companyId,
+    eventType: "company_archived",
+    eventData: { legal_name: company.legal_name },
+  });
+
+  revalidatePath("/app");
+  redirect("/app");
+}

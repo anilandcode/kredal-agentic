@@ -6,6 +6,7 @@ import {
   KREDAL_DISCLAIMER,
 } from "@/lib/constants";
 import { RISK_LABEL } from "@/lib/scoring/risk";
+import { requiredDocsFor } from "@/lib/checklist";
 import type {
   Company,
   CompanyDocument,
@@ -202,8 +203,123 @@ export function buildBankApplicationPackReport(data: ReportData): string {
   ].join("\n\n");
 }
 
-export function reportTitle(reportType: "founder_readiness" | "bank_application_pack"): string {
-  return reportType === "bank_application_pack"
-    ? "Bank application pack"
-    : "Founder readiness report";
+export function buildConsultantChecklistReport(data: ReportData): string {
+  const { company, documents, assessment, owners } = data;
+  const checklist = requiredDocsFor(company);
+
+  const docRows = [...checklist.required, ...checklist.optional].map((type) => {
+    const uploaded = hasDoc(documents, type);
+    const doc = documents.find((d) => d.document_type === type);
+    const required = checklist.required.includes(type) ? "Required" : "Optional";
+    const status = uploaded ? (doc?.status ?? "uploaded") : "missing";
+    return `| ${DOCUMENT_TYPE_LABELS[type]} | ${required} | ${uploaded ? "✅" : "❌"} | ${status} |`;
+  });
+
+  const highFlags = (assessment.flags as ReadinessFlag[]).filter(
+    (f) => f.severity === "high"
+  );
+
+  return [
+    `# Consultant checklist — ${company.legal_name}`,
+    "",
+    disclaimerSection(),
+    companySummarySection(data),
+    scoreSection(data),
+    [
+      "## Document checklist" +
+        (company.target_bank ? ` (tailored to ${company.target_bank})` : ""),
+      "",
+      "| Document | Requirement | Uploaded | Status |",
+      "|---|---|---|---|",
+      ...docRows,
+    ].join("\n"),
+    [
+      "## Client blockers (high severity)",
+      "",
+      ...(highFlags.length
+        ? highFlags.map((f, i) => `${i + 1}. ${f.issue} — _${f.fix}_`)
+        : ["No high-severity blockers."]),
+    ].join("\n"),
+    uboSummarySection(data),
+    [
+      "## Suggested client engagement steps",
+      "",
+      "1. Send the client the missing required documents list above.",
+      "2. Resolve every high-severity blocker before contacting the bank.",
+      `3. Confirm ownership records for ${owners.length || "the"} listed owner(s) match passports exactly.`,
+      "4. Re-run the assessment after fixes, then generate the bank application pack.",
+    ].join("\n"),
+  ].join("\n\n");
+}
+
+export function buildRejectionRecoveryPackReport(data: ReportData): string {
+  const { company, answers, assessment } = data;
+  const rejectedBank = str(answers.rejection_bank_name) || "the bank";
+  const rejectionReason = str(answers.rejection_reason);
+
+  return [
+    `# Rejection recovery pack — ${company.legal_name}`,
+    "",
+    disclaimerSection(),
+    [
+      "## What happened",
+      "",
+      `- **Previous application:** ${str(answers.previously_applied) === "yes" ? "Yes" : "Not recorded"}`,
+      `- **Bank:** ${rejectedBank}`,
+      `- **Stated reason:** ${rejectionReason || "_Not recorded — ask the bank for specifics in writing._"}`,
+    ].join("\n"),
+    scoreSection(data),
+    topRisksSection(data),
+    fixesSection(data),
+    sourceOfFundsNarrativeSection(data),
+    businessActivityNarrativeSection(data),
+    [
+      "## Resubmission letter skeleton",
+      "",
+      "> Dear Sir/Madam,",
+      ">",
+      `> We previously applied to open a business account for ${company.legal_name}` +
+        (rejectionReason ? `, and understand the application was declined (${rejectionReason.toLowerCase()}).` : "."),
+      "> Since then we have addressed the following points:",
+      ">",
+      "> - [List each fix completed, matching the Required fixes section above]",
+      ">",
+      "> Enclosed is our updated application pack, including [list key documents].",
+      "> We would welcome the opportunity to discuss any remaining questions.",
+      ">",
+      "> Sincerely,",
+      "> [Authorised signatory]",
+    ].join("\n"),
+    actionPlanSection(data),
+  ].join("\n\n");
+}
+
+export type BuildableReportType =
+  | "founder_readiness"
+  | "bank_application_pack"
+  | "consultant_checklist"
+  | "rejection_recovery_pack";
+
+const TITLES: Record<BuildableReportType, string> = {
+  founder_readiness: "Founder readiness report",
+  bank_application_pack: "Bank application pack",
+  consultant_checklist: "Consultant checklist",
+  rejection_recovery_pack: "Rejection recovery pack",
+};
+
+export function reportTitle(reportType: BuildableReportType): string {
+  return TITLES[reportType];
+}
+
+export function buildReport(reportType: BuildableReportType, data: ReportData): string {
+  switch (reportType) {
+    case "bank_application_pack":
+      return buildBankApplicationPackReport(data);
+    case "consultant_checklist":
+      return buildConsultantChecklistReport(data);
+    case "rejection_recovery_pack":
+      return buildRejectionRecoveryPackReport(data);
+    default:
+      return buildFounderReadinessReport(data);
+  }
 }

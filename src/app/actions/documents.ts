@@ -3,8 +3,11 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
+import { runExtraction } from "@/lib/ai/extract-document";
+import { isExtractable } from "@/lib/ai/extraction";
 import type { DocumentType } from "@/lib/types";
 
 export interface DocumentActionState {
@@ -63,6 +66,9 @@ export async function uploadDocument(
     });
   if (uploadError) return { error: uploadError.message };
 
+  const expiryRaw = String(formData.get("expiry_date") ?? "").trim();
+  const expiryDate = /^\d{4}-\d{2}-\d{2}$/.test(expiryRaw) ? expiryRaw : null;
+
   const { error: insertError } = await supabase.from("documents").insert({
     id: documentId,
     company_id: companyId,
@@ -72,6 +78,7 @@ export async function uploadDocument(
     original_filename: file.name,
     mime_type: file.type || null,
     file_size_bytes: file.size,
+    expiry_date: expiryDate,
     status: "uploaded",
   });
 
@@ -87,6 +94,12 @@ export async function uploadDocument(
     eventType: "document_uploaded",
     eventData: { document_type: documentType, filename: file.name },
   });
+
+  // AI extraction runs after the response is sent (no upload latency added).
+  // Membership was proven by the RLS-gated insert above.
+  if (isExtractable(documentType)) {
+    after(() => runExtraction(documentId));
+  }
 
   revalidatePath(`/app/companies/${companyId}/documents`);
   revalidatePath(`/app/companies/${companyId}`);

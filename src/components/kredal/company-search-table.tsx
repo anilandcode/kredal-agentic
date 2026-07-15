@@ -15,14 +15,22 @@ import { EmptyState } from "@/components/kredal/empty-state";
 import { COMPANY_STATUS_LABELS } from "@/lib/constants";
 import type { CompanySummary, CompanyStatus } from "@/lib/types";
 
+type StatusFilter = CompanyStatus | "active" | "all";
+
 export function CompanySearchTable({ companies }: { companies: CompanySummary[] }) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<CompanyStatus | "all">("all");
+  // "active" (everything except archived) is the default view.
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
 
   const filtered = useMemo(() => {
     return companies.filter((c) => {
       const matchesQuery = c.legal_name.toLowerCase().includes(query.toLowerCase());
-      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "active"
+            ? c.status !== "archived"
+            : c.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
   }, [companies, query, statusFilter]);
@@ -42,11 +50,12 @@ export function CompanySearchTable({ companies }: { companies: CompanySummary[] 
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as CompanyStatus | "all")}>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="active">Active (default)</SelectItem>
             <SelectItem value="all">All statuses</SelectItem>
             {Object.entries(COMPANY_STATUS_LABELS).map(([value, label]) => (
               <SelectItem key={value} value={value}>

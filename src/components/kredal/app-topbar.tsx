@@ -1,14 +1,19 @@
 import Link from "next/link";
-import { Building2 } from "lucide-react";
 import { KredalLogo } from "@/components/kredal/kredal-logo";
 import { UserMenu } from "@/components/kredal/user-menu";
+import {
+  WorkspaceSwitcher,
+  type SwitcherWorkspace,
+} from "@/components/kredal/workspace-switcher";
 
 export function AppTopbar({
   email,
-  workspaceName,
+  workspaces = [],
+  activeWorkspaceId,
 }: {
   email: string;
-  workspaceName?: string | null;
+  workspaces?: SwitcherWorkspace[];
+  activeWorkspaceId?: string | null;
 }) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border px-6">
@@ -16,13 +21,13 @@ export function AppTopbar({
         <Link href="/app">
           <KredalLogo />
         </Link>
-        {workspaceName ? (
+        {workspaces.length > 0 && activeWorkspaceId ? (
           <>
             <span className="text-border">/</span>
-            <span className="flex items-center gap-1.5 text-body-sm text-muted-foreground">
-              <Building2 className="h-4 w-4" strokeWidth={1.5} />
-              {workspaceName}
-            </span>
+            <WorkspaceSwitcher
+              workspaces={workspaces}
+              activeId={activeWorkspaceId}
+            />
           </>
         ) : null}
       </div>

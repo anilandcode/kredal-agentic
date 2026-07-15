@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanyStatusBadge } from "@/components/kredal/status-badge";
+import { ArchiveCompanyButton } from "@/components/kredal/archive-company-button";
 import {
   ProgressChecklist,
   type ChecklistStep,
@@ -12,7 +13,8 @@ import { getCompanyDocuments } from "@/lib/data/documents";
 import { getCompletedSections } from "@/lib/data/questionnaire";
 import { getLatestAssessment } from "@/lib/data/assessments";
 import { getCompanyReports } from "@/lib/data/reports";
-import { BASE_REQUIRED_DOCUMENT_TYPES, JURISDICTION_LABELS, QUESTIONNAIRE_SECTIONS } from "@/lib/constants";
+import { JURISDICTION_LABELS, QUESTIONNAIRE_SECTIONS } from "@/lib/constants";
+import { requiredDocsFor } from "@/lib/checklist";
 
 function SummaryRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -40,17 +42,18 @@ export default async function CompanyDetailPage({
   ]);
 
   const uploadedTypes = new Set(documents.map((d) => d.document_type));
-  const requiredUploaded = BASE_REQUIRED_DOCUMENT_TYPES.filter((t) =>
+  const checklist = requiredDocsFor(company);
+  const requiredUploaded = checklist.required.filter((t) =>
     uploadedTypes.has(t)
   ).length;
-  const documentsDone = requiredUploaded >= BASE_REQUIRED_DOCUMENT_TYPES.length;
+  const documentsDone = requiredUploaded >= checklist.required.length;
   const questionnaireDone = completedSections.size >= QUESTIONNAIRE_SECTIONS.length;
 
   const steps: ChecklistStep[] = [
     { key: "profile", label: "Company profile", state: "done" },
     {
       key: "documents",
-      label: `Documents (${requiredUploaded}/${BASE_REQUIRED_DOCUMENT_TYPES.length} required)`,
+      label: `Documents (${requiredUploaded}/${checklist.required.length} required)`,
       href: `/app/companies/${companyId}/documents`,
       state: documentsDone ? "done" : "current",
     },
@@ -97,12 +100,20 @@ export default async function CompanyDetailPage({
             {company.emirate ? ` · ${company.emirate}` : ""}
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href={`/app/companies/${companyId}/edit`}>
-            <Pencil className="h-4 w-4" strokeWidth={1.5} />
-            Edit
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {company.status !== "archived" ? (
+            <ArchiveCompanyButton
+              companyId={companyId}
+              legalName={company.legal_name}
+            />
+          ) : null}
+          <Button variant="outline" asChild>
+            <Link href={`/app/companies/${companyId}/edit`}>
+              <Pencil className="h-4 w-4" strokeWidth={1.5} />
+              Edit
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

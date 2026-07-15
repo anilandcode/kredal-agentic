@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
 import { CompanyForm } from "@/components/kredal/company-form";
 import { createCompany } from "@/app/actions/company";
-import { getUserWorkspaces } from "@/lib/data/workspaces";
+import { getActiveWorkspace } from "@/lib/data/workspaces";
 
 export default async function NewCompanyPage() {
-  const workspaces = await getUserWorkspaces();
-  const workspace = workspaces[0];
+  const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/app");
 
   return (

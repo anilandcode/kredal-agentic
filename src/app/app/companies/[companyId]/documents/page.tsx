@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Landmark } from "lucide-react";
 import { DocumentCard } from "@/components/kredal/document-card";
 import { getCompany } from "@/lib/data/companies";
 import { getCompanyDocuments } from "@/lib/data/documents";
-import { BASE_REQUIRED_DOCUMENT_TYPES, OPTIONAL_DOCUMENT_TYPES } from "@/lib/constants";
+import { requiredDocsFor } from "@/lib/checklist";
 import type { CompanyDocument, DocumentType } from "@/lib/types";
 
 export default async function CompanyDocumentsPage({
@@ -22,7 +22,8 @@ export default async function CompanyDocumentsPage({
     return acc;
   }, {});
 
-  const requiredDone = BASE_REQUIRED_DOCUMENT_TYPES.filter(
+  const checklist = requiredDocsFor(company);
+  const requiredDone = checklist.required.filter(
     (t) => (byType[t]?.length ?? 0) > 0
   ).length;
 
@@ -39,15 +40,24 @@ export default async function CompanyDocumentsPage({
       <div>
         <h1 className="text-h1 font-semibold">Documents</h1>
         <p className="text-body-sm text-muted-foreground">
-          {requiredDone} of {BASE_REQUIRED_DOCUMENT_TYPES.length} required
-          documents uploaded. PDF, PNG, or JPG — up to 15MB each.
+          {requiredDone} of {checklist.required.length} required documents
+          uploaded
+          {company.target_bank ? ` (checklist tailored to ${company.target_bank})` : ""}.
+          PDF, PNG, or JPG — up to 15MB each.
         </p>
       </div>
+
+      {checklist.bankNote ? (
+        <p className="flex items-start gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-body-sm text-muted-foreground">
+          <Landmark className="mt-0.5 h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
+          {company.target_bank}: {checklist.bankNote}
+        </p>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="text-h3 font-semibold">Required</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {BASE_REQUIRED_DOCUMENT_TYPES.map((type: DocumentType) => (
+          {checklist.required.map((type: DocumentType) => (
             <DocumentCard
               key={type}
               companyId={companyId}
@@ -62,7 +72,7 @@ export default async function CompanyDocumentsPage({
       <section className="space-y-3">
         <h2 className="text-h3 font-semibold">Optional</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {OPTIONAL_DOCUMENT_TYPES.map((type: DocumentType) => (
+          {checklist.optional.map((type: DocumentType) => (
             <DocumentCard
               key={type}
               companyId={companyId}

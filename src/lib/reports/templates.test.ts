@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBankApplicationPackReport,
+  buildConsultantChecklistReport,
   buildFounderReadinessReport,
+  buildRejectionRecoveryPackReport,
+  buildReport,
+  reportTitle,
   type ReportData,
 } from "@/lib/reports/templates";
 import { KREDAL_DISCLAIMER } from "@/lib/constants";
@@ -67,5 +71,31 @@ describe("report templates", () => {
     const report = buildFounderReadinessReport(makeData());
     expect(report).toContain("Al Falah General Trading LLC");
     expect(report).toContain("72 / 100");
+  });
+
+  it("consultant checklist includes the disclaimer and a document table", () => {
+    const report = buildConsultantChecklistReport(makeData());
+    expect(report).toContain(KREDAL_DISCLAIMER);
+    expect(report).toContain("| Document | Requirement | Uploaded | Status |");
+    expect(report).toContain("Client blockers");
+  });
+
+  it("rejection recovery pack includes the disclaimer and a resubmission skeleton", () => {
+    const report = buildRejectionRecoveryPackReport(makeData());
+    expect(report).toContain(KREDAL_DISCLAIMER);
+    expect(report).toContain("Resubmission letter skeleton");
+  });
+
+  it("buildReport dispatches every report type with the right title", () => {
+    for (const type of [
+      "founder_readiness",
+      "bank_application_pack",
+      "consultant_checklist",
+      "rejection_recovery_pack",
+    ] as const) {
+      const report = buildReport(type, makeData());
+      expect(report).toContain(KREDAL_DISCLAIMER);
+      expect(reportTitle(type).length).toBeGreaterThan(0);
+    }
   });
 });
