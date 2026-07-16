@@ -4,25 +4,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Type scale — DESIGN_SYSTEM.md §2.2. Weight is applied separately via
-   font-semibold/font-bold so each size stays composable. */
+/* ------------------------------------------------------------------------
+   Kredal Visual Identity v2 — warm ink/cream system (see /design.md).
+   Type scale + tracking: Cursor-derived. Tailwind v4: tokens live here.
+   ------------------------------------------------------------------------ */
+
 @theme {
-  --text-display: 2.25rem;
-  --text-display--line-height: 2.75rem;
-  --text-h1: 1.75rem;
-  --text-h1--line-height: 2.25rem;
-  --text-h2: 1.375rem;
-  --text-h2--line-height: 1.875rem;
+  --text-display: 2.8rem;
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.02em;
   --text-h3: 1.125rem;
-  --text-h3--line-height: 1.625rem;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.5rem;
-  --text-body-sm: 0.8125rem;
-  --text-body-sm--line-height: 1.25rem;
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.01em;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.45;
   --text-caption: 0.75rem;
-  --text-caption--line-height: 1rem;
+  --text-caption--line-height: 1.35;
   --text-score-xl: 3.5rem;
-  --text-score-xl--line-height: 3.75rem;
+  --text-score-xl--line-height: 1.05;
+  --text-score-xl--letter-spacing: -0.02em;
 }
 
 @theme inline {
@@ -69,7 +77,17 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Kredal risk semantics — DESIGN_SYSTEM.md §2.1. Fixed meaning: never used decoratively. */
+  /* Brand accent (orange) — CTAs, links, focus. Never body text on cream. */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+
+  /* Card tint ladder (feature grids, wells) */
+  --color-card-02: var(--card-02);
+  --color-card-03: var(--card-03);
+  --color-card-warm: var(--card-warm);
+  --color-ink-02: var(--ink-02);
+
+  /* Kredal risk semantics — meaning is fixed (design.md §3.3, ADR 0005/0010). */
   --color-risk-low: var(--risk-low);
   --color-risk-low-foreground: var(--risk-low-foreground);
   --color-risk-low-bg: var(--risk-low-bg);
@@ -80,7 +98,7 @@
   --color-risk-high-foreground: var(--risk-high-foreground);
   --color-risk-high-bg: var(--risk-high-bg);
 
-  /* Functional semantics — DESIGN_SYSTEM.md §2.1 */
+  /* Functional semantics */
   --color-info: var(--info);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -89,122 +107,141 @@
 }
 
 :root {
-  /* Neutrals — slate ramp */
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  /* Warm paper neutrals */
+  --background: #f7f7f4;
+  --foreground: #26251e;
+  --card: #fdfdfc;
+  --card-foreground: #26251e;
+  --popover: #fdfdfc;
+  --popover-foreground: #26251e;
 
-  /* Primary — Kredal Navy */
-  --primary: #1e3a8a;
-  --primary-foreground: #f8fafc;
-  --secondary: #eff3fc;
-  --secondary-foreground: #1e3a8a;
+  /* Primary = ink (buttons are ink pills) */
+  --primary: #26251e;
+  --primary-foreground: #f7f7f4;
+  --secondary: #f2f1ed;
+  --secondary-foreground: #26251e;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --accent: #dbe4f8;
-  --accent-foreground: #172e6e;
+  --muted: #f2f1ed;
+  --muted-foreground: #6b6a61;
+  --accent: #ebeae5;
+  --accent-foreground: #26251e;
 
-  --destructive: #b91c1c;
-  --destructive-foreground: #fef2f2;
+  --destructive: #cf2d56;
+  --destructive-foreground: #fdf2f5;
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #1e3a8a;
+  --border: #e6e5e0;
+  --input: #e6e5e0;
+  --ring: #f54e00;
 
-  /* Chart palette — categorical, color-blind-safe order */
-  --chart-1: #1e3a8a;
-  --chart-2: #0e7490;
-  --chart-3: #7c3aed;
-  --chart-4: #b45309;
-  --chart-5: #475569;
+  /* Brand accent */
+  --brand: #f54e00;
+  --brand-foreground: #fff5f0;
+
+  /* Card tint ladder + hover ink */
+  --card-02: #ebeae5;
+  --card-03: #e6e5e0;
+  --card-warm: #f3ede6;
+  --ink-02: #3b3a33;
+
+  /* Charts — warm pastels (categorical) */
+  --chart-1: #dfa88f;
+  --chart-2: #9fc9a2;
+  --chart-3: #9fbbe0;
+  --chart-4: #c0a8dd;
+  --chart-5: #6b6a61;
 
   --radius: 0.625rem;
 
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #1e3a8a;
-  --sidebar-primary-foreground: #f8fafc;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #1e3a8a;
+  --sidebar: #fdfdfc;
+  --sidebar-foreground: #26251e;
+  --sidebar-primary: #26251e;
+  --sidebar-primary-foreground: #f7f7f4;
+  --sidebar-accent: #f2f1ed;
+  --sidebar-accent-foreground: #26251e;
+  --sidebar-border: #e6e5e0;
+  --sidebar-ring: #f54e00;
 
-  /* Risk semantics — light theme */
-  --risk-low: #047857;
-  --risk-low-foreground: #065f46;
-  --risk-low-bg: #ecfdf5;
+  /* Risk semantics — light */
+  --risk-low: #1f8a65;
+  --risk-low-foreground: #156049;
+  --risk-low-bg: #e6f2ec;
   --risk-medium: #b45309;
-  --risk-medium-foreground: #92400e;
-  --risk-medium-bg: #fffbeb;
-  --risk-high: #b91c1c;
-  --risk-high-foreground: #991b1b;
-  --risk-high-bg: #fef2f2;
+  --risk-medium-foreground: #8a4207;
+  --risk-medium-bg: #f8eede;
+  --risk-high: #cf2d56;
+  --risk-high-foreground: #a81f43;
+  --risk-high-bg: #fae8ed;
 
-  /* Functional semantics — light theme */
-  --info: #1d4ed8;
-  --success: #047857;
+  /* Functional semantics — light (info is warm-neutral in this system) */
+  --info: #6b6a61;
+  --success: #1f8a65;
   --warning: #b45309;
 }
 
 .dark {
-  --background: #0b1120;
-  --foreground: #f1f5f9;
-  --card: #111827;
-  --card-foreground: #f1f5f9;
-  --popover: #111827;
-  --popover-foreground: #f1f5f9;
+  /* Warm ink */
+  --background: #14120b;
+  --foreground: #edecec;
+  --card: #1b1913;
+  --card-foreground: #edecec;
+  --popover: #1b1913;
+  --popover-foreground: #edecec;
 
-  --primary: #3155b4;
-  --primary-foreground: #f8fafc;
-  --secondary: #1e293b;
-  --secondary-foreground: #e2e8f0;
+  /* Primary inverts to cream pills */
+  --primary: #edecec;
+  --primary-foreground: #14120b;
+  --secondary: #201e18;
+  --secondary-foreground: #edecec;
 
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e2c4d;
-  --accent-foreground: #dbe4f8;
+  --muted: #201e18;
+  --muted-foreground: #a3a29b;
+  --accent: #26241c;
+  --accent-foreground: #edecec;
 
-  --destructive: #f87171;
-  --destructive-foreground: #450a0a;
+  --destructive: #f47b96;
+  --destructive-foreground: #2b0e16;
 
-  --border: #293548;
-  --input: #293548;
-  --ring: #3155b4;
+  --border: #2c2a23;
+  --input: #2c2a23;
+  --ring: #f54e00;
 
-  --chart-1: #6d8bde;
-  --chart-2: #22d3ee;
-  --chart-3: #a78bfa;
-  --chart-4: #fbbf24;
-  --chart-5: #94a3b8;
+  --brand: #f54e00;
+  --brand-foreground: #fff5f0;
 
-  --sidebar: #111827;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #3155b4;
-  --sidebar-primary-foreground: #f8fafc;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: #293548;
-  --sidebar-ring: #3155b4;
+  --card-02: #201e18;
+  --card-03: #26241c;
+  --card-warm: #221e15;
+  --ink-02: #d7d6d5;
 
-  /* Risk semantics — dark theme */
-  --risk-low: #34d399;
-  --risk-low-foreground: #052e21;
-  --risk-low-bg: #05230f;
-  --risk-medium: #fbbf24;
-  --risk-medium-foreground: #2a1c02;
-  --risk-medium-bg: #241a00;
-  --risk-high: #f87171;
-  --risk-high-foreground: #2f0a0a;
-  --risk-high-bg: #240808;
+  --chart-1: #dfa88f;
+  --chart-2: #9fc9a2;
+  --chart-3: #9fbbe0;
+  --chart-4: #c0a8dd;
+  --chart-5: #a3a29b;
 
-  /* Functional semantics — dark theme */
-  --info: #60a5fa;
-  --success: #34d399;
-  --warning: #fbbf24;
+  --sidebar: #1b1913;
+  --sidebar-foreground: #edecec;
+  --sidebar-primary: #edecec;
+  --sidebar-primary-foreground: #14120b;
+  --sidebar-accent: #201e18;
+  --sidebar-accent-foreground: #edecec;
+  --sidebar-border: #2c2a23;
+  --sidebar-ring: #f54e00;
+
+  /* Risk semantics — dark (lightened for contrast on ink) */
+  --risk-low: #3fbd90;
+  --risk-low-foreground: #a9e2cd;
+  --risk-low-bg: #14251d;
+  --risk-medium: #f2b13e;
+  --risk-medium-foreground: #f3d9a4;
+  --risk-medium-bg: #262012;
+  --risk-high: #f47b96;
+  --risk-high-foreground: #f6bac8;
+  --risk-high-bg: #291017;
+
+  --info: #a3a29b;
+  --success: #3fbd90;
+  --warning: #f2b13e;
 }
 
 @layer base {
@@ -213,6 +250,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    letter-spacing: -0.01em;
   }
   html {
     @apply font-sans;
@@ -227,6 +265,14 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  /* Uppercase eyebrow labels (marketing + style guide) */
+  .eyebrow {
+    font-size: var(--text-caption);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -239,8 +285,7 @@
   }
 }
 
-/* Report preview — DESIGN_SYSTEM.md §3 "Report preview". Manual styling
-   instead of a typography plugin, keyed to our own tokens. */
+/* Report preview — manual typography keyed to tokens (design.md §4). */
 .markdown-report {
   max-width: 42rem;
   font-size: var(--text-body);
@@ -292,7 +337,7 @@
   background: var(--muted);
   color: var(--muted-foreground);
   font-size: var(--text-body-sm);
-  border-inline-start: 3px solid var(--primary);
+  border-inline-start: 3px solid var(--foreground);
 }
 .markdown-report table {
   width: 100%;

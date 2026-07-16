@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { KredalLogo } from "@/components/kredal/kredal-logo";
-import { SecurityStrip } from "@/components/kredal/security-strip";
 import { Button } from "@/components/ui/button";
-import { KREDAL_DISCLAIMER } from "@/lib/constants";
+import { SiteNav } from "@/components/marketing/site-nav";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 const PLANS = [
   {
@@ -47,66 +46,55 @@ const PLANS = [
 export default function PricingPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <Link href="/">
-          <KredalLogo />
-        </Link>
-        <nav className="flex items-center gap-4 text-body-sm">
-          <Link href="/security" className="text-muted-foreground hover:text-foreground">
-            Security
-          </Link>
-          <Link href="/login" className="text-muted-foreground hover:text-foreground">
-            Sign in
-          </Link>
-        </nav>
-      </header>
-
-      <main className="flex-1 px-6 py-16">
+      <SiteNav />
+      <main className="flex-1 px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-display font-semibold">Simple, pilot-phase pricing</h1>
+          <p className="eyebrow">Pricing</p>
+          <h1 className="mt-3 text-display font-medium">
+            Simple, pilot-phase pricing
+          </h1>
           <p className="mt-4 text-body text-muted-foreground">
-            We&apos;re actively validating pricing during our pilot phase — these are
-            introductory rates for early UAE SMEs and consultants.
+            We&apos;re actively validating pricing during our pilot phase —
+            these are introductory rates for early UAE SMEs and consultants.
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto mt-14 grid max-w-5xl gap-4 sm:grid-cols-3">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`rounded-lg border p-6 ${
-                plan.highlighted ? "border-primary shadow-sm" : "border-border"
+              className={`rounded-2xl border p-6 ${
+                plan.highlighted
+                  ? "border-foreground bg-card-warm"
+                  : "border-border bg-muted"
               }`}
             >
               <h2 className="text-h3 font-semibold">{plan.name}</h2>
               <p className="mt-3">
-                <span className="text-h1 font-semibold tabular-nums">{plan.price}</span>{" "}
+                <span className="text-h1 font-bold tabular-nums">{plan.price}</span>{" "}
                 <span className="text-body-sm text-muted-foreground">{plan.period}</span>
               </p>
               <p className="mt-2 text-body-sm text-muted-foreground">{plan.description}</p>
               <ul className="mt-5 space-y-2 text-body-sm">
                 {plan.features.map((f) => (
                   <li key={f} className="flex gap-2">
-                    <span className="text-primary">✓</span>
+                    <span className="text-risk-low">✓</span>
                     <span>{f}</span>
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-6 w-full" variant={plan.highlighted ? "default" : "outline"}>
+              <Button
+                asChild
+                className="mt-6 w-full"
+                variant={plan.highlighted ? "default" : "outline"}
+              >
                 <Link href="/signup">Get started</Link>
               </Button>
             </div>
           ))}
         </div>
-
-        <p className="mx-auto mt-12 max-w-2xl text-center text-body-sm text-muted-foreground">
-          {KREDAL_DISCLAIMER}
-        </p>
       </main>
-
-      <footer className="flex flex-col items-center gap-3 border-t border-border px-6 py-8">
-        <SecurityStrip />
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

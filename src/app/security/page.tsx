@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { FileCheck, Lock, ShieldCheck, Trash2, UserCheck } from "lucide-react";
-import { KredalLogo } from "@/components/kredal/kredal-logo";
-import { SecurityStrip } from "@/components/kredal/security-strip";
-import { KREDAL_DISCLAIMER } from "@/lib/constants";
+import { SiteNav } from "@/components/marketing/site-nav";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 const CONTROLS = [
   {
@@ -35,39 +33,21 @@ const CONTROLS = [
 export default function SecurityPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <Link href="/">
-          <KredalLogo />
-        </Link>
-        <nav className="flex items-center gap-4 text-body-sm">
-          <Link href="/pricing" className="text-muted-foreground hover:text-foreground">
-            Pricing
-          </Link>
-          <a
-            href="https://docs-site-henna-eight.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Docs
-          </a>
-          <Link href="/login" className="text-muted-foreground hover:text-foreground">
-            Sign in
-          </Link>
-        </nav>
-      </header>
-
-      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-        <h1 className="text-display font-semibold">Security & data handling</h1>
+      <SiteNav />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-20">
+        <p className="eyebrow">Security</p>
+        <h1 className="mt-3 text-display font-medium">
+          Security &amp; data handling
+        </h1>
         <p className="mt-4 text-body text-muted-foreground">
-          Kredal handles sensitive documents — trade licenses, passports, Emirates IDs,
-          UBO declarations. Here is exactly how we protect them.
+          Kredal handles sensitive documents — trade licenses, passports,
+          Emirates IDs, UBO declarations. Here is exactly how we protect them.
         </p>
 
-        <div className="mt-10 space-y-8">
+        <div className="mt-12 space-y-8">
           {CONTROLS.map((c) => (
             <div key={c.title} className="flex gap-4">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-accent text-primary">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-card-02 text-foreground">
                 <c.icon className="h-4.5 w-4.5" strokeWidth={1.5} />
               </div>
               <div>
@@ -77,15 +57,8 @@ export default function SecurityPage() {
             </div>
           ))}
         </div>
-
-        <div className="mt-12 rounded-lg border border-border bg-muted/50 p-5">
-          <p className="text-body-sm text-muted-foreground">{KREDAL_DISCLAIMER}</p>
-        </div>
       </main>
-
-      <footer className="flex flex-col items-center gap-3 border-t border-border px-6 py-8">
-        <SecurityStrip />
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

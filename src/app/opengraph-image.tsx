@@ -1,9 +1,11 @@
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
 export const alt = "Kredal — UAE SME bank-readiness platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+/** OG card — Visual Identity v2: K-check mark + wordmark on warm ink. */
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -13,38 +15,64 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#0b1120",
-          backgroundImage: "linear-gradient(135deg, #0b1120 0%, #1e3a8a 100%)",
-          color: "#f8fafc",
+          justifyContent: "space-between",
+          background: "#14120b",
+          color: "#edecec",
+          padding: 72,
           fontFamily: "sans-serif",
         }}
       >
-        <svg width="120" height="120" viewBox="0 0 64 64">
-          <rect width="64" height="64" rx="14" fill="#1e3a8a" />
-          <path
-            d="M32 12l15 6v12c0 10.5-6.4 18.9-15 22-8.6-3.1-15-11.5-15-22V18l15-6z"
-            fill="none"
-            stroke="#f8fafc"
-            strokeWidth="4"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M25 32l5 5 10-10"
-            fill="none"
-            stroke="#f8fafc"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <div style={{ fontSize: 84, fontWeight: 700, marginTop: 32 }}>Kredal</div>
-        <div style={{ fontSize: 32, color: "#dbe4f8", marginTop: 16, textAlign: "center" }}>
-          Know why a UAE bank would reject your file — before you apply.
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="14" fill="#f7f7f4" />
+            <path
+              d="M22 16v32"
+              stroke="#14120b"
+              strokeWidth="7"
+              strokeLinecap="round"
+            />
+            <path
+              d="M44 16 24 33"
+              stroke="#14120b"
+              strokeWidth="7"
+              strokeLinecap="round"
+            />
+            <path
+              d="m28 37 8 11L50 28"
+              fill="none"
+              stroke="#14120b"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div style={{ fontSize: 44, fontWeight: 600, letterSpacing: -1 }}>
+            Kredal
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div
+            style={{
+              fontSize: 66,
+              fontWeight: 600,
+              lineHeight: 1.08,
+              letterSpacing: -2,
+              maxWidth: 980,
+            }}
+          >
+            Know why a bank would reject your file — before you apply.
+          </div>
+          <div style={{ fontSize: 30, color: "#b7b6b2" }}>
+            Readiness score · risk flags · bank-ready application pack
+          </div>
+        </div>
+
+        <div style={{ display: "flex", fontSize: 24, color: "#8a897f" }}>
+          kredal — UAE SME bank-readiness
         </div>
       </div>
     ),
-    size
+    { ...size }
   );
 }
