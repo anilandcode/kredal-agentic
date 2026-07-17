@@ -30,29 +30,21 @@ export async function createWorkspace(
     return { error: "Your session expired. Sign in again." };
   }
 
-  const { data: workspace, error: workspaceError } = await supabase
-    .from("workspaces")
-    .insert({
-      name,
-      workspace_type: workspaceType === "consultant" ? "consultant" : "single_company",
-      owner_user_id: user.id,
-    })
-    .select("id")
-    .single();
+  // Atomic security-definer RPC: a plain insert + select can't work here —
+  // the new row isn't visible to the caller until the membership row exists.
+  const { data: workspaceId, error: workspaceError } = await supabase.rpc(
+    "create_workspace_with_owner",
+    {
+      ws_name: name,
+      ws_type: workspaceType === "consultant" ? "consultant" : "single_company",
+    }
+  );
 
-  if (workspaceError) {
-    return { error: workspaceError.message };
+  if (workspaceError || !workspaceId) {
+    return { error: workspaceError?.message ?? "Could not create the workspace." };
   }
 
-  const { error: memberError } = await supabase.from("workspace_members").insert({
-    workspace_id: workspace.id,
-    user_id: user.id,
-    role: "owner",
-  });
-
-  if (memberError) {
-    return { error: memberError.message };
-  }
+  const workspace = { id: workspaceId as string };
 
   await logAuditEvent(supabase, {
     userId: user.id,
