@@ -30,10 +30,16 @@ export async function signUp(
   }
 
   const supabase = await createClient();
+  const origin = (await headers()).get("origin") ?? "";
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName || null } },
+    options: {
+      data: { full_name: fullName || null },
+      // Without this, Supabase falls back to the project Site URL, which may
+      // point at a different environment than the one the user signed up on.
+      emailRedirectTo: `${origin}/auth/callback?next=/app`,
+    },
   });
 
   if (error) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArrowRight,
   FileCheck,
@@ -283,7 +284,18 @@ function PricingTeaser() {
 
 /* ---------------------------------------------------------------- page -- */
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
+  // Auth links sometimes land on the root (e.g. emails sent while the
+  // Supabase Site URL pointed elsewhere) — forward the code so the session
+  // still completes instead of being silently dropped.
+  const { code } = await searchParams;
+  if (code) {
+    redirect(`/auth/callback?code=${encodeURIComponent(code)}&next=/app`);
+  }
   return (
     <div className="flex flex-1 flex-col">
       <SiteNav />
