@@ -17,9 +17,15 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  const [workspaces, active] = await Promise.all([
+  // Cheap user-scoped read: platform_admins only exposes the caller's own row.
+  const [workspaces, active, { data: adminRow }] = await Promise.all([
     getUserWorkspaces(),
     getActiveWorkspace(),
+    supabase
+      .from("platform_admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle(),
   ]);
 
   return (
@@ -32,6 +38,7 @@ export default async function AppLayout({
           workspace_type: w.workspace_type,
         }))}
         activeWorkspaceId={active?.id ?? null}
+        showAdminLink={!!adminRow}
       />
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
         {children}

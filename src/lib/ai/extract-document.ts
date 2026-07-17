@@ -64,6 +64,12 @@ export async function runExtraction(documentId: string): Promise<void> {
       .from("documents")
       .update({ status: "needs_review", parse_confidence: 0 })
       .eq("id", documentId);
+    await admin.from("audit_events").insert({
+      company_id: doc.company_id,
+      user_id: doc.uploaded_by,
+      event_type: "document_extraction_failed",
+      event_data: { document_id: documentId, error: String(err).slice(0, 300) },
+    });
     console.error(`extraction failed for ${documentId}:`, err);
   }
 }

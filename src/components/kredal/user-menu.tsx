@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,13 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { signOut } from "@/app/actions/auth";
 
-export function UserMenu({ email }: { email: string }) {
+export function UserMenu({
+  email,
+  showAdminLink = false,
+}: {
+  email: string;
+  showAdminLink?: boolean;
+}) {
   const initials = email.charAt(0).toUpperCase();
 
   return (
@@ -29,6 +36,14 @@ export function UserMenu({ email }: { email: string }) {
           {email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {showAdminLink ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" className="cursor-pointer">
+              <ShieldCheck className="h-4 w-4" strokeWidth={1.5} />
+              Admin
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <form action={signOut}>
           <DropdownMenuItem asChild>
             <button type="submit" className="w-full cursor-pointer">

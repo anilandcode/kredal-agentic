@@ -10,10 +10,12 @@ export function AppTopbar({
   email,
   workspaces = [],
   activeWorkspaceId,
+  showAdminLink = false,
 }: {
   email: string;
   workspaces?: SwitcherWorkspace[];
   activeWorkspaceId?: string | null;
+  showAdminLink?: boolean;
 }) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border px-6">
@@ -31,7 +33,7 @@ export function AppTopbar({
           </>
         ) : null}
       </div>
-      <UserMenu email={email} />
+      <UserMenu email={email} showAdminLink={showAdminLink} />
     </header>
   );
 }
