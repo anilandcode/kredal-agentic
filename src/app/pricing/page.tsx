@@ -2,10 +2,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SiteNav } from "@/components/marketing/site-nav";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { paymentLink, type PaidPlanKey } from "@/lib/payments";
 
-const PLANS = [
+const PLANS: {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  linkKey: PaidPlanKey;
+  highlighted?: boolean;
+}[] = [
   {
     name: "Readiness diagnostic",
+    linkKey: "diagnostic",
     price: "AED 499",
     period: "one-time",
     description: "Know exactly why a bank might reject your file, before you apply.",
@@ -18,6 +28,7 @@ const PLANS = [
   },
   {
     name: "Bank application pack",
+    linkKey: "pack",
     price: "AED 1,999",
     period: "one-time",
     description: "A document-prepared pack ready to bring to the bank.",
@@ -31,6 +42,7 @@ const PLANS = [
   },
   {
     name: "Consultant workspace",
+    linkKey: "consultant",
     price: "AED 499",
     period: "/month",
     description: "For accountants and business setup consultants managing multiple clients.",
@@ -83,13 +95,22 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Button
-                asChild
-                className="mt-6 w-full"
-                variant={plan.highlighted ? "default" : "outline"}
-              >
-                <Link href="/signup">Get started</Link>
-              </Button>
+              {(() => {
+                const link = paymentLink(plan.linkKey);
+                return (
+                  <Button
+                    asChild
+                    className="mt-6 w-full"
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    {link ? (
+                      <a href={link}>Buy now</a>
+                    ) : (
+                      <Link href="/signup">Get started</Link>
+                    )}
+                  </Button>
+                );
+              })()}
             </div>
           ))}
         </div>

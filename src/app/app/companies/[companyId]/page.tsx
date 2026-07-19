@@ -8,9 +8,14 @@ import {
   ProgressChecklist,
   type ChecklistStep,
 } from "@/components/kredal/progress-checklist";
+import { ComplianceRadar } from "@/components/kredal/compliance-radar";
 import { getCompany } from "@/lib/data/companies";
 import { getCompanyDocuments } from "@/lib/data/documents";
-import { getCompletedSections } from "@/lib/data/questionnaire";
+import {
+  getCompletedSections,
+  getQuestionnaireAnswers,
+} from "@/lib/data/questionnaire";
+import { buildComplianceRadar } from "@/lib/compliance";
 import { getLatestAssessment } from "@/lib/data/assessments";
 import { getCompanyReports } from "@/lib/data/reports";
 import { JURISDICTION_LABELS, QUESTIONNAIRE_SECTIONS } from "@/lib/constants";
@@ -34,12 +39,15 @@ export default async function CompanyDetailPage({
   const company = await getCompany(companyId);
   if (!company) notFound();
 
-  const [documents, completedSections, assessment, reports] = await Promise.all([
-    getCompanyDocuments(companyId),
-    getCompletedSections(companyId),
-    getLatestAssessment(companyId),
-    getCompanyReports(companyId),
-  ]);
+  const [documents, completedSections, assessment, reports, answers] =
+    await Promise.all([
+      getCompanyDocuments(companyId),
+      getCompletedSections(companyId),
+      getLatestAssessment(companyId),
+      getCompanyReports(companyId),
+      getQuestionnaireAnswers(companyId),
+    ]);
+  const radarItems = buildComplianceRadar({ company, documents, answers });
 
   const uploadedTypes = new Set(documents.map((d) => d.document_type));
   const checklist = requiredDocsFor(company);
@@ -146,8 +154,9 @@ export default async function CompanyDetailPage({
           </div>
         </div>
 
-        <div>
+        <div className="space-y-6">
           <ProgressChecklist steps={steps} />
+          <ComplianceRadar items={radarItems} />
         </div>
       </div>
     </div>

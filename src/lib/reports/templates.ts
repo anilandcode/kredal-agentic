@@ -7,6 +7,7 @@ import {
 } from "@/lib/constants";
 import { RISK_LABEL } from "@/lib/scoring/risk";
 import { requiredDocsFor } from "@/lib/checklist";
+import { buildRecoveryPlan } from "@/lib/reports/recovery-advisor";
 import type {
   Company,
   CompanyDocument,
@@ -256,6 +257,10 @@ export function buildRejectionRecoveryPackReport(data: ReportData): string {
   const { company, answers, assessment } = data;
   const rejectedBank = str(answers.rejection_bank_name) || "the bank";
   const rejectionReason = str(answers.rejection_reason);
+  const plan = buildRecoveryPlan(
+    rejectionReason,
+    assessment.flags as ReadinessFlag[]
+  );
 
   return [
     `# Rejection recovery pack — ${company.legal_name}`,
@@ -267,6 +272,14 @@ export function buildRejectionRecoveryPackReport(data: ReportData): string {
       `- **Previous application:** ${str(answers.previously_applied) === "yes" ? "Yes" : "Not recorded"}`,
       `- **Bank:** ${rejectedBank}`,
       `- **Stated reason:** ${rejectionReason || "_Not recorded — ask the bank for specifics in writing._"}`,
+    ].join("\n"),
+    [
+      "## Targeted recovery plan",
+      "",
+      `**Likely cause category:** ${plan.causeLabel}`,
+      `**Realistic timeline before re-applying:** ${plan.timeline}`,
+      "",
+      ...plan.steps.map((s, i) => `${i + 1}. ${s}`),
     ].join("\n"),
     scoreSection(data),
     topRisksSection(data),

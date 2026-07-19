@@ -8,9 +8,13 @@ import { EmptyState } from "@/components/kredal/empty-state";
 import { SubmitButton } from "@/components/kredal/submit-button";
 import { DisclaimerBanner } from "@/components/kredal/disclaimer-banner";
 import { AssessmentHistory } from "@/components/kredal/assessment-history";
+import { BankMatchCard } from "@/components/kredal/bank-match-card";
 import { runReadinessAssessment } from "@/app/actions/assessment";
-import { getCompany } from "@/lib/data/companies";
+import { getCompany, getCompanyOwners } from "@/lib/data/companies";
 import { getAssessments } from "@/lib/data/assessments";
+import { getCompanyDocuments } from "@/lib/data/documents";
+import { getQuestionnaireAnswers } from "@/lib/data/questionnaire";
+import { matchBanks } from "@/lib/scoring/bank-match";
 import type { ReadinessFlag } from "@/lib/types";
 
 export default async function AssessmentPage({
@@ -22,10 +26,18 @@ export default async function AssessmentPage({
   const company = await getCompany(companyId);
   if (!company) notFound();
 
-  const assessments = await getAssessments(companyId);
+  const [assessments, owners, documents, answers] = await Promise.all([
+    getAssessments(companyId),
+    getCompanyOwners(companyId),
+    getCompanyDocuments(companyId),
+    getQuestionnaireAnswers(companyId),
+  ]);
   const assessment = assessments[0] ?? null;
   const history = assessments.slice(1);
   const runAssessment = runReadinessAssessment.bind(null, companyId);
+  const bankMatches = assessment
+    ? matchBanks({ company, owners, documents, answers })
+    : [];
 
   return (
     <div className="space-y-6">
@@ -78,6 +90,7 @@ export default async function AssessmentPage({
                   <CategoryScoreBar key={id} categoryId={id} score={score} />
                 ))}
               </div>
+              <BankMatchCard matches={bankMatches} />
             </div>
 
             <div className="space-y-6 lg:col-span-2">

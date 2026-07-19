@@ -98,7 +98,7 @@ function uboOwner(owners: CompanyOwner[]): CompanyOwner | undefined {
   return owners.find((o) => (o.ownership_percentage ?? 0) >= 25);
 }
 
-const HIGH_MIN_BALANCE_BANKS = new Set(["Mashreq", "Emirates NBD", "FAB", "ADCB"]);
+export const HIGH_MIN_BALANCE_BANKS = new Set(["Mashreq", "Emirates NBD", "FAB", "ADCB"]);
 const GENERIC_ACTIVITY_PHRASES = ["general trading", "trading", "consulting", "services"];
 
 /**
