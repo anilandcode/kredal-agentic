@@ -2,11 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
+  Building2,
+  Clock,
   FileCheck,
   Files,
   Gauge,
+  Landmark,
   ScanText,
   ShieldCheck,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -282,6 +286,155 @@ function PricingTeaser() {
   );
 }
 
+/* ------------------------------------------------------------- why now -- */
+
+const WHY_NOW = [
+  {
+    icon: Landmark,
+    title: "Open Finance went live",
+    body: "The UAE's Open Finance framework launched in 2026 — the rails that make a real-time bankability score possible are now here.",
+  },
+  {
+    icon: Clock,
+    title: "Compliance is stacking up",
+    body: "Corporate tax, e-invoicing, WPS payroll and Emiratisation deadlines in 2026–27 are forcing every SME into structured, auditable financial operations.",
+  },
+  {
+    icon: Building2,
+    title: "No software incumbent",
+    body: "Bookkeeping tools sit downstream; bank onboarding readiness is still handled by manual consultants. The gate is wide open.",
+  },
+];
+
+function WhyNow() {
+  return (
+    <section className="border-b border-border bg-muted/50">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <p className="eyebrow">Why now</p>
+        <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
+          The moment the UAE turns SME banking into infrastructure.
+        </h2>
+        <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          {WHY_NOW.map((w) => (
+            <div key={w.title}>
+              <w.icon className="h-5 w-5 text-brand" strokeWidth={1.5} />
+              <h3 className="mt-4 text-h3 font-semibold">{w.title}</h3>
+              <p className="mt-2 text-body-sm text-muted-foreground">{w.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ----------------------------------------------------------- traction -- */
+
+const TRACTION: [string, string][] = [
+  ["Live", "in production — app, docs and admin, tested end-to-end"],
+  ["10", "AI agents shipped, each replacing a manual step"],
+  ["31", "end-to-end scenarios in our production test suite"],
+  ["Weeks", "from zero to a live product, built with agentic AI"],
+];
+
+function Traction() {
+  return (
+    <section id="traction" className="mx-auto max-w-6xl px-6 py-24">
+      <p className="eyebrow">Where we are</p>
+      <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
+        Not a prototype — a working product you can use today.
+      </h2>
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {TRACTION.map(([n, label]) => (
+          <div
+            key={label}
+            className="rounded-2xl border border-border bg-card p-6"
+          >
+            <p className="text-h1 font-bold tabular-nums">{n}</p>
+            <p className="mt-2 text-body-sm text-muted-foreground">{label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------------------------------------- team -- */
+
+// Founding team. Fill in real names, roles, one-line bios and LinkedIn URLs,
+// then flip SHOW_TEAM to true to render the section publicly.
+const SHOW_TEAM = false;
+const FOUNDERS = [
+  {
+    name: "[Founder name]",
+    role: "Co-founder — product & engineering",
+    bio: "Built the entire Kredal platform — ten AI agents and the deterministic scoring engine — using agentic AI development.",
+    linkedin: "#",
+  },
+  {
+    name: "[Co-founder name]",
+    role: "Co-founder — growth & partnerships",
+    bio: "[One line on background and what they lead — GTM, consultant channel, UAE market.]",
+    linkedin: "#",
+  },
+];
+
+function Team() {
+  if (!SHOW_TEAM) return null;
+  return (
+    <section id="team" className="border-y border-border">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <p className="eyebrow">Founding team</p>
+        <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
+          Two founders, close to the problem.
+        </h2>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          {FOUNDERS.map((f) => (
+            <div
+              key={f.role}
+              className="rounded-2xl border border-border bg-card p-6"
+            >
+              <div className="h-14 w-14 rounded-full bg-card-02" />
+              <h3 className="mt-4 text-h3 font-semibold">{f.name}</h3>
+              <p className="text-body-sm font-medium text-brand">{f.role}</p>
+              <p className="mt-2 text-body-sm text-muted-foreground">{f.bio}</p>
+              <a
+                href={f.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1 text-caption font-medium text-foreground hover:underline"
+              >
+                LinkedIn
+                <ArrowRight data-icon="inline-end" className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------ mission -- */
+
+function Mission() {
+  return (
+    <section className="dark bg-background text-foreground">
+      <div className="mx-auto max-w-3xl px-6 py-24 text-center">
+        <Sparkles className="mx-auto h-6 w-6 text-brand" strokeWidth={1.5} />
+        <h2 className="mt-4 text-balance text-display font-medium">
+          Make every UAE SME bankable.
+        </h2>
+        <p className="mx-auto mt-6 max-w-xl text-balance text-body text-muted-foreground">
+          UAE small businesses are more than 63% of the non-oil economy but
+          receive under 10% of its credit. Kredal exists to close that gap — one
+          bank-ready company at a time — starting at the very first gate.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------------------------------------------------------- page -- */
 
 export default async function Home({
@@ -302,8 +455,12 @@ export default async function Home({
       <main className="flex-1">
         <Hero />
         <Stats />
+        <WhyNow />
         <Features />
         <AiSection />
+        <Traction />
+        <Team />
+        <Mission />
         <PricingTeaser />
       </main>
       <SiteFooter />

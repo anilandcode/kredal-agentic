@@ -17,6 +17,9 @@ export function SiteNav() {
             <Link href="/#features">Features</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Link href="/#traction">Company</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
             <Link href="/pricing">Pricing</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
