@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SiteNav, DOCS_URL } from "@/components/marketing/site-nav";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { FounderAvatar } from "@/components/marketing/founder-avatar";
 
 /* ---------------------------------------------------------------- hero -- */
 
@@ -361,26 +362,28 @@ function Traction() {
 
 /* --------------------------------------------------------------- team -- */
 
-// Founding team. Fill in real names, roles, one-line bios and LinkedIn URLs,
-// then flip SHOW_TEAM to true to render the section publicly.
-const SHOW_TEAM = false;
 const FOUNDERS = [
   {
-    name: "[Founder name]",
-    role: "Co-founder — product & engineering",
-    bio: "Built the entire Kredal platform — ten AI agents and the deterministic scoring engine — using agentic AI development.",
-    linkedin: "#",
+    name: "Anil Pervaiz",
+    initials: "AP",
+    photo: "/team/anil.jpg",
+    role: "Co-founder & CEO — Product & AI Engineering",
+    bio: "AI agents & automation engineer with a decade of design and Webflow craft; built Saaspo, one of the most-visited SaaS design galleries. Built Kredal's ten agents, RAG, and deterministic scoring engine.",
+    linkedin: "https://www.linkedin.com/in/anilpervaiz/",
+    site: "anilpervaiz.com",
   },
   {
-    name: "[Co-founder name]",
-    role: "Co-founder — growth & partnerships",
-    bio: "[One line on background and what they lead — GTM, consultant channel, UAE market.]",
-    linkedin: "#",
+    name: "Zainab Ahmad",
+    initials: "ZA",
+    photo: "/team/zainab.jpg",
+    role: "Co-founder — Design & Brand",
+    bio: "Designer leading Kredal's product design, brand, and user experience — turning a compliance-heavy process into something a founder can actually follow.",
+    linkedin: "https://www.linkedin.com/in/zainab-ahmad",
+    site: "designwithzainab.com",
   },
 ];
 
 function Team() {
-  if (!SHOW_TEAM) return null;
   return (
     <section id="team" className="border-y border-border">
       <div className="mx-auto max-w-6xl px-6 py-24">
@@ -391,22 +394,32 @@ function Team() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {FOUNDERS.map((f) => (
             <div
-              key={f.role}
+              key={f.name}
               className="rounded-2xl border border-border bg-card p-6"
             >
-              <div className="h-14 w-14 rounded-full bg-card-02" />
+              <FounderAvatar src={f.photo} alt={f.name} initials={f.initials} />
               <h3 className="mt-4 text-h3 font-semibold">{f.name}</h3>
               <p className="text-body-sm font-medium text-brand">{f.role}</p>
               <p className="mt-2 text-body-sm text-muted-foreground">{f.bio}</p>
-              <a
-                href={f.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-1 text-caption font-medium text-foreground hover:underline"
-              >
-                LinkedIn
-                <ArrowRight data-icon="inline-end" className="h-3.5 w-3.5" />
-              </a>
+              <div className="mt-3 flex items-center gap-4 text-caption font-medium">
+                <a
+                  href={f.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-foreground hover:underline"
+                >
+                  LinkedIn
+                  <ArrowRight data-icon="inline-end" className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href={`https://${f.site}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:underline"
+                >
+                  {f.site}
+                </a>
+              </div>
             </div>
           ))}
         </div>
