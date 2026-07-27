@@ -4,96 +4,26 @@ import {
   ArrowRight,
   Building2,
   Clock,
-  FileCheck,
-  Files,
-  Gauge,
   Landmark,
-  ScanText,
-  ShieldCheck,
   Sparkles,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteNav, DOCS_URL } from "@/components/marketing/site-nav";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { FounderAvatar } from "@/components/marketing/founder-avatar";
+import {
+  AssessmentFrame,
+  ConsultantFrame,
+  ExtractionFrame,
+  PackPreviewFrame,
+} from "@/components/marketing/product-frames";
 
 /* ---------------------------------------------------------------- hero -- */
-
-function HeroProductFrame() {
-  return (
-    <div className="mx-auto w-full max-w-3xl rounded-2xl border border-border bg-card p-1.5 shadow-2xl shadow-black/40">
-      <div className="flex items-center gap-1.5 px-3 py-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-        <span className="mx-auto text-caption text-muted-foreground">
-          Kredal — Rejection-risk assessment
-        </span>
-      </div>
-      <div className="grid gap-4 rounded-xl bg-background p-5 sm:grid-cols-[auto_1fr]">
-        {/* Score gauge */}
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card px-8 py-5">
-          <svg viewBox="0 0 200 110" className="w-40">
-            <path
-              d="M 20 100 A 80 80 0 0 1 180 100"
-              fill="none"
-              stroke="var(--border)"
-              strokeWidth="14"
-              strokeLinecap="round"
-            />
-            <path
-              d="M 20 100 A 80 80 0 0 1 180 100"
-              fill="none"
-              stroke="var(--risk-medium)"
-              strokeWidth="14"
-              strokeLinecap="round"
-              strokeDasharray={Math.PI * 80}
-              strokeDashoffset={Math.PI * 80 * (1 - 0.62)}
-            />
-          </svg>
-          <p className="-mt-6 text-h1 font-bold tabular-nums">62</p>
-          <p className="text-caption text-risk-medium font-medium">Medium risk</p>
-        </div>
-        {/* Flags */}
-        <div className="space-y-2">
-          {[
-            ["high", "UBO declaration missing for 60% shareholder"],
-            ["high", "No source-of-funds evidence on file"],
-            ["medium", "Trade license name differs from profile"],
-          ].map(([sev, text]) => (
-            <div
-              key={text}
-              className="flex items-start gap-2.5 rounded-lg border border-border bg-card px-3.5 py-2.5"
-            >
-              <span
-                className={
-                  sev === "high"
-                    ? "mt-1 h-2 w-2 shrink-0 rounded-full bg-risk-high"
-                    : "mt-1 h-2 w-2 shrink-0 rounded-full bg-risk-medium"
-                }
-              />
-              <div>
-                <p className="text-body-sm text-foreground">{text}</p>
-                <p className="text-caption text-muted-foreground">
-                  Fix provided · 2 min
-                </p>
-              </div>
-            </div>
-          ))}
-          <p className="pt-1 text-caption text-muted-foreground">
-            32 deterministic checks · every flag maps to an exact fix
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Hero() {
   return (
     <section className="dark bg-background text-foreground">
-      <div className="mx-auto max-w-6xl px-6 pb-20 pt-24 text-center sm:pt-28">
+      <div className="mx-auto max-w-6xl px-6 pb-24 pt-24 text-center sm:pt-28">
         <h1 className="mx-auto max-w-3xl text-balance text-display font-medium">
           Know why a bank would reject your file — before you apply.
         </h1>
@@ -102,7 +32,7 @@ function Hero() {
           rejection risk with an exact fix, and assembles a bank-ready
           application pack.
         </p>
-        <div className="mt-9 flex items-center justify-center gap-3">
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Button size="lg" asChild>
             <Link href="/signup">Start your readiness check</Link>
           </Button>
@@ -112,176 +42,257 @@ function Hero() {
             </a>
           </Button>
         </div>
-        <div className="mt-16">
-          <HeroProductFrame />
+        <div className="mx-auto mt-16 max-w-4xl">
+          <AssessmentFrame />
         </div>
       </div>
     </section>
   );
 }
 
-/* --------------------------------------------------------------- stats -- */
+/* ------------------------------------------------------------ bank row -- */
 
-const STATS: [string, string][] = [
-  ["50–65%", "of first-time SME account applications are rejected or delayed"],
-  ["$250B", "GCC SME financing gap"],
-  ["9.5%", "of UAE commercial credit reaches SMEs — vs 60%+ of non-oil GDP"],
-  ["32", "deterministic readiness checks in every assessment"],
+const BANKS = [
+  "Wio Bank",
+  "Mashreq",
+  "Emirates NBD",
+  "RAKBANK",
+  "ADCB",
+  "FAB",
+  "ADIB",
 ];
 
-function Stats() {
+function BankRow() {
   return (
     <section className="border-b border-border">
-      <div className="mx-auto grid max-w-6xl gap-px overflow-hidden px-6 py-14 sm:grid-cols-4">
-        {STATS.map(([n, label]) => (
-          <div key={label} className="px-4 py-3">
-            <p className="text-h1 font-bold tabular-nums">{n}</p>
-            <p className="mt-1 text-caption text-muted-foreground">{label}</p>
-          </div>
-        ))}
+      <div className="mx-auto max-w-6xl px-6 py-14 text-center">
+        <p className="text-caption font-medium uppercase tracking-widest text-muted-foreground">
+          Checklists tuned for
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {BANKS.map((b) => (
+            <span key={b} className="text-h3 font-semibold text-foreground/70">
+              {b}
+            </span>
+          ))}
+        </div>
+        <p className="mx-auto mt-6 max-w-2xl text-caption text-muted-foreground">
+          Bank names indicate supported document checklists. Kredal is
+          independent and not affiliated with, endorsed by, or partnered with
+          these banks.
+        </p>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------ features -- */
+/* ----------------------------------------------------------- showcases -- */
 
-const FEATURES = [
+function Showcase({
+  id,
+  eyebrow,
+  title,
+  body,
+  linkHref,
+  linkLabel,
+  external,
+  frame,
+  reverse,
+  tint,
+}: {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  linkHref: string;
+  linkLabel: string;
+  external?: boolean;
+  frame: React.ReactNode;
+  reverse?: boolean;
+  tint: string;
+}) {
+  return (
+    <section id={id} className="mx-auto max-w-6xl px-6 py-8 first:pt-16">
+      <div
+        className={`grid items-center gap-10 rounded-3xl border border-border p-8 sm:p-12 lg:grid-cols-2 ${tint}`}
+      >
+        <div className={reverse ? "lg:order-2" : undefined}>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2 className="mt-3 text-h1 font-semibold">{title}</h2>
+          <p className="mt-4 text-body text-muted-foreground">{body}</p>
+          <div className="mt-6">
+            {external ? (
+              <Button variant="secondary" asChild>
+                <a href={linkHref} target="_blank" rel="noopener noreferrer">
+                  {linkLabel}
+                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                </a>
+              </Button>
+            ) : (
+              <Button variant="secondary" asChild>
+                <Link href={linkHref}>
+                  {linkLabel}
+                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className={reverse ? "lg:order-1" : undefined}>{frame}</div>
+      </div>
+    </section>
+  );
+}
+
+function Showcases() {
+  return (
+    <>
+      <Showcase
+        id="features"
+        eyebrow="See the risk first"
+        title="The rejection reasons, before the bank finds them."
+        body="Seven weighted categories, 32 auditable checks, one deterministic 0–100 score. Every flag names the exact document or answer that caused it — and the exact fix."
+        linkHref="/signup"
+        linkLabel="Run a readiness check"
+        frame={<AssessmentFrame />}
+        tint="bg-muted"
+      />
+      <Showcase
+        eyebrow="AI, kept honest"
+        title="AI reads your documents. Rules give the verdict."
+        body="Trade licenses, passports, Emirates IDs and tenancy contracts are extracted server-side, then cross-checked against each other and your profile. The score itself is never guessed — every point is a rule you can audit."
+        linkHref={`${DOCS_URL}/docs/reference/scoring-engine`}
+        linkLabel="See every scoring rule"
+        external
+        frame={<ExtractionFrame />}
+        reverse
+        tint="bg-card-warm"
+      />
+      <Showcase
+        eyebrow="The output"
+        title="A pack you can walk into the branch with."
+        body="Company summary, source-of-funds narrative, UBO table and a bank-specific preparation checklist — assembled, disclosed and exportable, tuned to the bank you're targeting."
+        linkHref="/pricing"
+        linkLabel="See what's included"
+        frame={<PackPreviewFrame />}
+        tint="bg-card-02"
+      />
+      <Showcase
+        eyebrow="For consultants"
+        title="Every client's readiness, in one workspace."
+        body="Business-setup consultants and accountants run multiple client companies side by side, with roles, invitations and white-label reports — and see at a glance who is ready to apply."
+        linkHref="/pricing"
+        linkLabel="Consultant workspaces"
+        frame={<ConsultantFrame />}
+        reverse
+        tint="bg-muted"
+      />
+    </>
+  );
+}
+
+/* --------------------------------------------------------- agents band -- */
+
+const AGENTS: [string, string][] = [
+  ["Document extraction", "Reads licences, IDs and contracts into structured facts"],
+  ["Consistency checking", "Cross-checks names, activity and expiry across documents"],
+  ["Deterministic scoring", "32 rules, 7 categories, one explainable score"],
+  ["Risk flags & fixes", "Every deduction becomes a concrete next action"],
+  ["Source-of-funds drafter", "Writes the narrative banks ask for"],
+  ["Pack assembler", "Builds the full submission set for your bank"],
+  ["Docs assistant", "Answers “why does the bank need this?” instantly"],
+  ["Recovery advisor", "Turns a rejection reason into a targeted plan"],
+  ["Bank matcher", "Ranks which banks fit this file best"],
+  ["Compliance monitor", "Watches expiries and 2026 tax, VAT and WPS dates"],
+];
+
+function AgentsBand() {
+  return (
+    <section id="agents" className="border-y border-border bg-muted/40">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <p className="eyebrow">How it works</p>
+        <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
+          Ten agents. One file.
+        </h2>
+        <p className="mt-4 max-w-2xl text-body text-muted-foreground">
+          Each one replaces a step a consultant or bank officer does by hand
+          today.
+        </p>
+        <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-5">
+          {AGENTS.map(([title, body], i) => (
+            <div key={title} className="bg-background p-5">
+              <span className="text-caption font-medium tabular-nums text-brand">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-2 text-body-sm font-semibold">{title}</h3>
+              <p className="mt-1 text-caption text-muted-foreground">{body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------------------------- built in the open -- */
+
+const OPEN_PROOF = [
   {
-    icon: Gauge,
-    bg: "bg-card-warm",
-    title: "A readiness score banks would recognise",
-    body: "Seven weighted categories, 32 auditable checks, one deterministic 0–100 score. The same inputs always produce the same verdict.",
+    stat: "32",
+    title: "Scoring rules, published",
+    body: "Every rule that can cost you points is documented in public — including its weight and the fix it recommends.",
+    href: `${DOCS_URL}/docs/reference/scoring-engine`,
+    cta: "Read the rules",
   },
   {
-    icon: FileCheck,
-    bg: "bg-muted",
-    title: "Every flag comes with the fix",
-    body: "Not “improve your documents” — “upload a UBO declaration naming this 60% shareholder.” Plain language, exact actions.",
+    stat: "12",
+    title: "Architecture decisions on record",
+    body: "Why AI never decides the score, how tenant isolation works, how admin access is granted — written down, not asserted.",
+    href: `${DOCS_URL}/docs/adr/0009-ai-advisory-deterministic-score`,
+    cta: "Read the decisions",
   },
   {
-    icon: ScanText,
-    bg: "bg-card-02",
-    title: "AI reads your documents",
-    body: "Trade licenses, passports, Emirates IDs and tenancy contracts are extracted server-side and cross-checked against your profile.",
-  },
-  {
-    icon: Files,
-    bg: "bg-card-02",
-    title: "Bank-specific checklists",
-    body: "Wio, Mashreq, Emirates NBD, RAKBANK, ADCB, FAB, ADIB — the document list adapts to the bank you're targeting.",
-  },
-  {
-    icon: ShieldCheck,
-    bg: "bg-muted",
-    title: "A pack you can walk into the branch with",
-    body: "Company summary, source-of-funds narrative, UBO table and preparation checklist — exportable, disclosed, review-ready.",
-  },
-  {
-    icon: Users,
-    bg: "bg-card-warm",
-    title: "Built for consultants too",
-    body: "Multi-client workspaces with roles and invitations. Track every client's readiness from one dashboard.",
+    stat: "31",
+    title: "End-to-end scenarios tested",
+    body: "The full flow — signup, documents, questionnaire, scoring, reports, tenant isolation — verified against production.",
+    href: DOCS_URL,
+    cta: "Browse the docs",
   },
 ];
 
-function Features() {
+function BuiltInTheOpen() {
   return (
-    <section id="features" className="mx-auto max-w-6xl px-6 py-24">
-      <p className="eyebrow">What Kredal does</p>
+    <section className="mx-auto max-w-6xl px-6 py-24">
+      <p className="eyebrow">Built in the open</p>
       <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
-        The pre-application layer between your company and the bank.
+        Judge the engine, not the marketing.
       </h2>
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f) => (
+      <p className="mt-4 max-w-2xl text-body text-muted-foreground">
+        A readiness score is only worth something if you can see how it was
+        calculated. Ours is public.
+      </p>
+      <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        {OPEN_PROOF.map((c) => (
           <div
-            key={f.title}
-            className={`rounded-2xl border border-border p-6 ${f.bg}`}
+            key={c.title}
+            className="flex flex-col rounded-2xl border border-border bg-card p-6"
           >
-            <f.icon className="h-5 w-5 text-foreground" strokeWidth={1.5} />
-            <h3 className="mt-4 text-h3 font-semibold">{f.title}</h3>
-            <p className="mt-2 text-body-sm text-muted-foreground">{f.body}</p>
+            <p className="text-h1 font-bold tabular-nums text-brand">{c.stat}</p>
+            <h3 className="mt-3 text-h3 font-semibold">{c.title}</h3>
+            <p className="mt-2 flex-1 text-body-sm text-muted-foreground">
+              {c.body}
+            </p>
+            <a
+              href={c.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-1 text-body-sm font-medium hover:underline"
+            >
+              {c.cta}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ AI -- */
-
-function AiSection() {
-  return (
-    <section className="border-y border-border bg-muted/50">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-2">
-        <div>
-          <p className="eyebrow">AI, kept honest</p>
-          <h2 className="mt-3 text-h1 font-semibold">
-            AI does the reading. Deterministic rules give the verdict.
-          </h2>
-          <p className="mt-4 text-body text-muted-foreground">
-            Document extraction and narrative drafting are AI-powered. The
-            score never is — every point is a rule you can audit, so the
-            assessment is explainable to you, to consultants, and to banks.
-          </p>
-          <div className="mt-6">
-            <Button variant="secondary" asChild>
-              <a
-                href={`${DOCS_URL}/docs/reference/scoring-engine`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                See every scoring rule
-                <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-5 font-mono text-caption leading-6">
-          <p className="text-muted-foreground"># extraction · trade_license.pdf</p>
-          <p>
-            legal_name: <span className="text-risk-low">&quot;Al Barakah Foods Trading LLC&quot;</span>
-          </p>
-          <p>
-            expiry_date: <span className="text-risk-low">&quot;2027-03-14&quot;</span> · confidence 0.94
-          </p>
-          <p className="mt-3 text-muted-foreground"># cross-document checks</p>
-          <p>
-            <span className="text-risk-low">✓</span> license name matches profile
-          </p>
-          <p>
-            <span className="text-risk-high">✗</span> passport name ≠ any listed owner
-            <span className="text-muted-foreground"> → fix suggested</span>
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------- pricing -- */
-
-function PricingTeaser() {
-  return (
-    <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-      <p className="eyebrow">Pilot pricing</p>
-      <h2 className="mt-3 text-h1 font-semibold">
-        A diagnostic costs less than one branch visit.
-      </h2>
-      <p className="mx-auto mt-4 max-w-lg text-body text-muted-foreground">
-        Readiness diagnostic from AED 499 · bank application pack AED 1,999 ·
-        consultant workspaces AED 499/month.
-      </p>
-      <div className="mt-8 flex items-center justify-center gap-3">
-        <Button size="lg" asChild>
-          <Link href="/pricing">See pricing</Link>
-        </Button>
-        <Button size="lg" variant="ghost" asChild>
-          <Link href="/security">
-            How we protect your documents
-            <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-          </Link>
-        </Button>
       </div>
     </section>
   );
@@ -309,7 +320,7 @@ const WHY_NOW = [
 
 function WhyNow() {
   return (
-    <section className="border-b border-border bg-muted/50">
+    <section className="border-y border-border bg-muted/50">
       <div className="mx-auto max-w-6xl px-6 py-24">
         <p className="eyebrow">Why now</p>
         <h2 className="mt-3 max-w-2xl text-h1 font-semibold">
@@ -329,7 +340,7 @@ function WhyNow() {
   );
 }
 
-/* ----------------------------------------------------------- traction -- */
+/* ------------------------------------------------------------ traction -- */
 
 const TRACTION: [string, string][] = [
   ["Live", "in production — app, docs and admin, tested end-to-end"],
@@ -360,7 +371,7 @@ function Traction() {
   );
 }
 
-/* --------------------------------------------------------------- team -- */
+/* ---------------------------------------------------------------- team -- */
 
 const FOUNDERS = [
   {
@@ -428,7 +439,7 @@ function Team() {
   );
 }
 
-/* ------------------------------------------------------------ mission -- */
+/* ------------------------------------------------------------- mission -- */
 
 function Mission() {
   return (
@@ -442,6 +453,66 @@ function Mission() {
           UAE small businesses are more than 63% of the non-oil economy but
           receive under 10% of its credit. Kredal exists to close that gap — one
           bank-ready company at a time — starting at the very first gate.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------- pricing -- */
+
+function PricingTeaser() {
+  return (
+    <section className="mx-auto max-w-6xl px-6 py-24 text-center">
+      <p className="eyebrow">Pilot pricing</p>
+      <h2 className="mt-3 text-h1 font-semibold">
+        A diagnostic costs less than one branch visit.
+      </h2>
+      <p className="mx-auto mt-4 max-w-lg text-body text-muted-foreground">
+        Readiness diagnostic from AED 499 · bank application pack AED 1,999 ·
+        consultant workspaces AED 499/month.
+      </p>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Button size="lg" asChild>
+          <Link href="/pricing">See pricing</Link>
+        </Button>
+        <Button size="lg" variant="ghost" asChild>
+          <Link href="/security">
+            How we protect your documents
+            <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------------------------------- closing CTA -- */
+
+function ClosingCTA() {
+  return (
+    <section className="dark bg-background text-foreground">
+      <div className="mx-auto max-w-4xl px-6 py-28 text-center">
+        <h2 className="text-balance text-display font-medium">
+          Know your score before the bank does.
+        </h2>
+        <p className="mx-auto mt-6 max-w-lg text-balance text-body text-muted-foreground">
+          Upload your documents, answer the questionnaire, and see exactly what
+          stands between your company and an open account.
+        </p>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <Button size="lg" asChild>
+            <Link href="/signup">Start your readiness check</Link>
+          </Button>
+          <Button size="lg" variant="outline" asChild>
+            <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
+              Read the docs
+            </a>
+          </Button>
+        </div>
+        <p className="mt-8 text-caption text-muted-foreground">
+          Kredal is not a bank, lender, law firm, auditor or tax advisor, and
+          does not guarantee bank approval.
         </p>
       </div>
     </section>
@@ -467,14 +538,16 @@ export default async function Home({
       <SiteNav />
       <main className="flex-1">
         <Hero />
-        <Stats />
+        <BankRow />
+        <Showcases />
+        <AgentsBand />
+        <BuiltInTheOpen />
         <WhyNow />
-        <Features />
-        <AiSection />
         <Traction />
         <Team />
         <Mission />
         <PricingTeaser />
+        <ClosingCTA />
       </main>
       <SiteFooter />
     </div>
