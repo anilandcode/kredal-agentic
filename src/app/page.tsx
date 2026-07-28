@@ -22,8 +22,14 @@ import {
 
 function Hero() {
   return (
-    <section className="dark bg-background text-foreground">
-      <div className="mx-auto max-w-6xl px-6 pb-24 pt-24 text-center sm:pt-28">
+    <section className="dark relative overflow-hidden bg-background text-foreground">
+      {/* Atmospheric wash, faded toward the fold so it never fights the copy. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-[820px] bg-cover bg-top opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]"
+        style={{ backgroundImage: "url(/backgrounds/hero-dark.webp)" }}
+      />
+      <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-24 text-center sm:pt-28">
         <h1 className="mx-auto max-w-3xl text-balance text-display font-medium">
           Know why a bank would reject your file — before you apply.
         </h1>
@@ -98,7 +104,7 @@ function Showcase({
   external,
   frame,
   reverse,
-  tint,
+  art,
 }: {
   id?: string;
   eyebrow: string;
@@ -109,36 +115,53 @@ function Showcase({
   external?: boolean;
   frame: React.ReactNode;
   reverse?: boolean;
-  tint: string;
+  /** Basename in /backgrounds — the -light/-dark pair of painterly washes. */
+  art: string;
 }) {
   return (
     <section id={id} className="mx-auto max-w-6xl px-6 py-8 first:pt-16">
-      <div
-        className={`grid items-center gap-10 rounded-3xl border border-border p-8 sm:p-12 lg:grid-cols-2 ${tint}`}
-      >
-        <div className={reverse ? "lg:order-2" : undefined}>
-          <p className="eyebrow">{eyebrow}</p>
-          <h2 className="mt-3 text-h1 font-semibold">{title}</h2>
-          <p className="mt-4 text-body text-muted-foreground">{body}</p>
-          <div className="mt-6">
-            {external ? (
-              <Button variant="secondary" asChild>
-                <a href={linkHref} target="_blank" rel="noopener noreferrer">
-                  {linkLabel}
-                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-                </a>
-              </Button>
-            ) : (
-              <Button variant="secondary" asChild>
-                <Link href={linkHref}>
-                  {linkLabel}
-                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-                </Link>
-              </Button>
-            )}
+      <div className="relative overflow-hidden rounded-3xl border border-border">
+        {/* Painterly background art (design.md § Background art) — one wash per
+            theme, with a scrim so headline and body text stay legible. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-cover bg-center dark:hidden"
+          style={{ backgroundImage: `url(/backgrounds/${art}-light.webp)` }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden bg-cover bg-center dark:block"
+          style={{ backgroundImage: `url(/backgrounds/${art}-dark.webp)` }}
+        />
+        {/* Scrim strength is set by the WCAG worst case measured against the
+            darkest/brightest pixel of each wash — see design.md § Background art. */}
+        <div aria-hidden className="absolute inset-0 bg-background/75 dark:bg-background/45" />
+
+        <div className="relative grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
+          <div className={reverse ? "lg:order-2" : undefined}>
+            <p className="eyebrow">{eyebrow}</p>
+            <h2 className="mt-3 text-h1 font-semibold">{title}</h2>
+            <p className="mt-4 text-body text-muted-foreground">{body}</p>
+            <div className="mt-6">
+              {external ? (
+                <Button variant="secondary" asChild>
+                  <a href={linkHref} target="_blank" rel="noopener noreferrer">
+                    {linkLabel}
+                    <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                  </a>
+                </Button>
+              ) : (
+                <Button variant="secondary" asChild>
+                  <Link href={linkHref}>
+                    {linkLabel}
+                    <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
+          <div className={reverse ? "lg:order-1" : undefined}>{frame}</div>
         </div>
-        <div className={reverse ? "lg:order-1" : undefined}>{frame}</div>
       </div>
     </section>
   );
@@ -155,7 +178,7 @@ function Showcases() {
         linkHref="/signup"
         linkLabel="Run a readiness check"
         frame={<AssessmentFrame />}
-        tint="bg-muted"
+        art="panel-1"
       />
       <Showcase
         eyebrow="AI, kept honest"
@@ -166,7 +189,7 @@ function Showcases() {
         external
         frame={<ExtractionFrame />}
         reverse
-        tint="bg-card-warm"
+        art="panel-2"
       />
       <Showcase
         eyebrow="The output"
@@ -175,7 +198,7 @@ function Showcases() {
         linkHref="/pricing"
         linkLabel="See what's included"
         frame={<PackPreviewFrame />}
-        tint="bg-card-02"
+        art="panel-3"
       />
       <Showcase
         eyebrow="For consultants"
@@ -185,7 +208,7 @@ function Showcases() {
         linkLabel="Consultant workspaces"
         frame={<ConsultantFrame />}
         reverse
-        tint="bg-muted"
+        art="panel-4"
       />
     </>
   );
