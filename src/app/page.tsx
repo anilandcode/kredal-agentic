@@ -18,18 +18,52 @@ import {
   PackPreviewFrame,
 } from "@/components/marketing/product-frames";
 
+/* ----------------------------------------------------------- art stage -- */
+
+/**
+ * The painted stage: a generated wash (design.md § 3.7) framing a product
+ * visual, with the painting left visible as a margin around it. Only the image
+ * area is painted — copy always sits on flat background, so contrast is never
+ * at the mercy of the art.
+ */
+function ArtStage({
+  art,
+  children,
+  className = "",
+}: {
+  /** Basename in /backgrounds — resolves the -light/-dark pair. */
+  art: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`relative overflow-hidden rounded-3xl ${className}`}>
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center dark:hidden"
+        style={{ backgroundImage: `url(/backgrounds/${art}-light.webp)` }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 hidden bg-cover bg-center dark:block"
+        style={{ backgroundImage: `url(/backgrounds/${art}-dark.webp)` }}
+      />
+      {/* The painted margin: padding here is what makes the art read as a frame. */}
+      <div className="relative p-5 sm:p-8 lg:p-12">
+        <div className="overflow-hidden rounded-xl shadow-2xl shadow-black/30 ring-1 ring-black/10">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------------- hero -- */
 
 function Hero() {
   return (
-    <section className="dark relative overflow-hidden bg-background text-foreground">
-      {/* Atmospheric wash, faded toward the fold so it never fights the copy. */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[820px] bg-cover bg-top opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]"
-        style={{ backgroundImage: "url(/backgrounds/hero-dark.webp)" }}
-      />
-      <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-24 text-center sm:pt-28">
+    <section className="dark bg-background text-foreground">
+      <div className="mx-auto max-w-6xl px-6 pb-24 pt-24 text-center sm:pt-28">
         <h1 className="mx-auto max-w-3xl text-balance text-display font-medium">
           Know why a bank would reject your file — before you apply.
         </h1>
@@ -48,8 +82,10 @@ function Hero() {
             </a>
           </Button>
         </div>
-        <div className="mx-auto mt-16 max-w-4xl">
-          <AssessmentFrame />
+        <div className="mx-auto mt-16 max-w-5xl text-left">
+          <ArtStage art="hero">
+            <AssessmentFrame />
+          </ArtStage>
         </div>
       </div>
     </section>
@@ -120,48 +156,36 @@ function Showcase({
 }) {
   return (
     <section id={id} className="mx-auto max-w-6xl px-6 py-8 first:pt-16">
-      <div className="relative overflow-hidden rounded-3xl border border-border">
-        {/* Painterly background art (design.md § Background art) — one wash per
-            theme, with a scrim so headline and body text stay legible. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-cover bg-center dark:hidden"
-          style={{ backgroundImage: `url(/backgrounds/${art}-light.webp)` }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 hidden bg-cover bg-center dark:block"
-          style={{ backgroundImage: `url(/backgrounds/${art}-dark.webp)` }}
-        />
-        {/* Scrim strength is set by the WCAG worst case measured against the
-            darkest/brightest pixel of each wash — see design.md § Background art. */}
-        <div aria-hidden className="absolute inset-0 bg-background/75 dark:bg-background/45" />
-
-        <div className="relative grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
-          <div className={reverse ? "lg:order-2" : undefined}>
-            <p className="eyebrow">{eyebrow}</p>
-            <h2 className="mt-3 text-h1 font-semibold">{title}</h2>
-            <p className="mt-4 text-body text-muted-foreground">{body}</p>
-            <div className="mt-6">
-              {external ? (
-                <Button variant="secondary" asChild>
-                  <a href={linkHref} target="_blank" rel="noopener noreferrer">
-                    {linkLabel}
-                    <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-                  </a>
-                </Button>
-              ) : (
-                <Button variant="secondary" asChild>
-                  <Link href={linkHref}>
-                    {linkLabel}
-                    <ArrowRight data-icon="inline-end" className="h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
-            </div>
+      <div className="rounded-3xl border border-border bg-muted p-6 sm:p-8">
+        {/* Copy always sits on flat panel background — never on the art. The
+            stage below spans the full panel so the product UI keeps its real
+            proportions instead of cramming into a half-width column. */}
+        <div className={`max-w-2xl ${reverse ? "ml-auto text-right" : ""}`}>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2 className="mt-3 text-h1 font-semibold">{title}</h2>
+          <p className="mt-4 text-body text-muted-foreground">{body}</p>
+          <div className="mt-6">
+            {external ? (
+              <Button variant="secondary" asChild>
+                <a href={linkHref} target="_blank" rel="noopener noreferrer">
+                  {linkLabel}
+                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                </a>
+              </Button>
+            ) : (
+              <Button variant="secondary" asChild>
+                <Link href={linkHref}>
+                  {linkLabel}
+                  <ArrowRight data-icon="inline-end" className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
-          <div className={reverse ? "lg:order-1" : undefined}>{frame}</div>
         </div>
+        {/* The image area: painted stage with the product visual inset. */}
+        <ArtStage art={art} className="mt-10">
+          {frame}
+        </ArtStage>
       </div>
     </section>
   );

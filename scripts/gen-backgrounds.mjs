@@ -24,8 +24,8 @@ import sharp from "sharp";
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(here, "../public/backgrounds");
 
-const W = 1600;
-const H = 1000;
+const W = 1700;
+const H = 760;
 
 /** Brand palette — keep in sync with design.md. */
 const C = {
@@ -79,104 +79,96 @@ function washSVG({ base, fields, seed = 3 }, w = W, h = H) {
 </svg>`;
 }
 
-/** Panel washes — each index shares a hue family across light and dark. */
+/** Panel washes — each index shares a hue family across light and dark.
+ *
+ * Fields are large and overlapping so paint reaches every edge of the stage; a
+ * wash whose fields fade back to bare cream reads as an unpainted box, not as
+ * art. Copy never sits on these, so they run at full strength.
+ */
 const PANELS = [
   {
     name: "panel-1", // sand
-    light: {
-      base: C.cream,
-      seed: 5,
-      fields: [
-        { cx: 0.2, cy: 0.28, r: 0.5, color: C.sand, opacity: 0.72 },
-        { cx: 0.72, cy: 0.72, r: 0.42, color: C.sand, opacity: 0.4 },
-        { cx: 0.6, cy: 0.1, r: 0.3, color: C.sage, opacity: 0.3 },
-      ],
-    },
-    dark: {
-      base: C.dark,
-      seed: 5,
-      fields: [
-        { cx: 0.2, cy: 0.28, r: 0.5, color: C.sand, opacity: 0.42 },
-        { cx: 0.74, cy: 0.74, r: 0.4, color: C.sand, opacity: 0.16 },
-        { cx: 0.62, cy: 0.1, r: 0.28, color: C.orange, opacity: 0.16 },
-      ],
-    },
+    light: { base: C.warmCard, seed: 5, fields: [
+      { cx: 0.18, cy: 0.3, r: 0.62, color: C.sand, opacity: 1 },
+      { cx: 0.78, cy: 0.72, r: 0.55, color: C.sand, opacity: 0.7 },
+      { cx: 0.6, cy: 0.08, r: 0.44, color: C.sage, opacity: 0.6 },
+    ] },
+    dark: { base: C.dark, seed: 5, fields: [
+      { cx: 0.18, cy: 0.3, r: 0.62, color: C.sand, opacity: 0.73 },
+      { cx: 0.78, cy: 0.72, r: 0.55, color: C.sand, opacity: 0.36 },
+      { cx: 0.6, cy: 0.08, r: 0.44, color: C.orange, opacity: 0.32 },
+    ] },
   },
   {
     name: "panel-2", // sage
-    light: {
-      base: C.cream,
-      seed: 17,
-      fields: [
-        { cx: 0.74, cy: 0.32, r: 0.5, color: C.sage, opacity: 0.85 },
-        { cx: 0.26, cy: 0.74, r: 0.4, color: C.sage, opacity: 0.42 },
-        { cx: 0.42, cy: 0.16, r: 0.28, color: C.sand, opacity: 0.42 },
-      ],
-    },
-    dark: {
-      base: C.dark,
-      seed: 17,
-      fields: [
-        { cx: 0.74, cy: 0.32, r: 0.5, color: C.sage, opacity: 0.36 },
-        { cx: 0.24, cy: 0.74, r: 0.4, color: C.sage, opacity: 0.14 },
-        { cx: 0.44, cy: 0.14, r: 0.26, color: C.sand, opacity: 0.16 },
-      ],
-    },
+    light: { base: C.warmCard, seed: 17, fields: [
+      { cx: 0.76, cy: 0.34, r: 0.62, color: C.sage, opacity: 1 },
+      { cx: 0.22, cy: 0.7, r: 0.55, color: C.sage, opacity: 0.66 },
+      { cx: 0.4, cy: 0.12, r: 0.44, color: C.sand, opacity: 0.72 },
+    ] },
+    dark: { base: C.dark, seed: 17, fields: [
+      { cx: 0.76, cy: 0.34, r: 0.62, color: C.sage, opacity: 0.6 },
+      { cx: 0.22, cy: 0.7, r: 0.55, color: C.sage, opacity: 0.3 },
+      { cx: 0.4, cy: 0.12, r: 0.44, color: C.sand, opacity: 0.34 },
+    ] },
   },
   {
     name: "panel-3", // neutral warm
-    light: {
-      base: C.cream,
-      seed: 29,
-      fields: [
-        { cx: 0.32, cy: 0.6, r: 0.52, color: C.sand, opacity: 0.6 },
-        { cx: 0.78, cy: 0.24, r: 0.4, color: C.sage, opacity: 0.45 },
-        { cx: 0.5, cy: 0.9, r: 0.3, color: C.sand, opacity: 0.35 },
-      ],
-    },
-    dark: {
-      base: C.dark,
-      seed: 29,
-      fields: [
-        { cx: 0.32, cy: 0.6, r: 0.5, color: C.sand, opacity: 0.26 },
-        { cx: 0.78, cy: 0.24, r: 0.38, color: C.sage, opacity: 0.2 },
-        { cx: 0.5, cy: 0.9, r: 0.28, color: C.sand, opacity: 0.14 },
-      ],
-    },
+    light: { base: C.warmCard, seed: 29, fields: [
+      { cx: 0.3, cy: 0.62, r: 0.64, color: C.sand, opacity: 0.9 },
+      { cx: 0.8, cy: 0.22, r: 0.55, color: C.sage, opacity: 0.8 },
+      { cx: 0.52, cy: 0.95, r: 0.44, color: C.sand, opacity: 0.6 },
+    ] },
+    dark: { base: C.dark, seed: 29, fields: [
+      { cx: 0.3, cy: 0.62, r: 0.64, color: C.sand, opacity: 0.5 },
+      { cx: 0.8, cy: 0.22, r: 0.55, color: C.sage, opacity: 0.38 },
+      { cx: 0.52, cy: 0.95, r: 0.44, color: C.sand, opacity: 0.3 },
+    ] },
   },
   {
     name: "panel-4", // sand + orange
-    light: {
-      base: C.cream,
-      seed: 41,
-      fields: [
-        { cx: 0.7, cy: 0.62, r: 0.5, color: C.sand, opacity: 0.68 },
-        { cx: 0.24, cy: 0.28, r: 0.4, color: C.sage, opacity: 0.34 },
-        { cx: 0.86, cy: 0.12, r: 0.24, color: C.orange, opacity: 0.22 },
-      ],
-    },
-    dark: {
-      base: C.dark,
-      seed: 41,
-      fields: [
-        { cx: 0.7, cy: 0.62, r: 0.48, color: C.sand, opacity: 0.36 },
-        { cx: 0.24, cy: 0.28, r: 0.38, color: C.sage, opacity: 0.16 },
-        { cx: 0.86, cy: 0.12, r: 0.22, color: C.orange, opacity: 0.24 },
-      ],
-    },
+    light: { base: C.warmCard, seed: 41, fields: [
+      { cx: 0.72, cy: 0.64, r: 0.62, color: C.sand, opacity: 0.95 },
+      { cx: 0.2, cy: 0.26, r: 0.55, color: C.sage, opacity: 0.62 },
+      { cx: 0.9, cy: 0.1, r: 0.36, color: C.orange, opacity: 0.4 },
+    ] },
+    dark: { base: C.dark, seed: 41, fields: [
+      { cx: 0.72, cy: 0.64, r: 0.62, color: C.sand, opacity: 0.66 },
+      { cx: 0.2, cy: 0.26, r: 0.55, color: C.sage, opacity: 0.3 },
+      { cx: 0.9, cy: 0.1, r: 0.36, color: C.orange, opacity: 0.46 },
+    ] },
   },
 ];
 
-/** Hero: wide, dark, atmospheric — sits behind the headline and product frame. */
+/**
+ * Hero stage: frames the headline product visual. Rendered at the wide, short
+ * aspect the stage actually occupies (2000×820) — a taller canvas would put the
+ * colour fields outside the `bg-cover` crop and the margin would read as flat.
+ * Fields are spread across the full frame so every visible edge is painted.
+ */
 const HERO = {
-  base: C.dark,
-  seed: 63,
-  grain: 0.4,
-  fields: [
-    { cx: 0.5, cy: 0.06, r: 0.6, color: C.sand, opacity: 0.3 },
-    { cx: 0.14, cy: 0.4, r: 0.42, color: C.sage, opacity: 0.18 },
-    { cx: 0.86, cy: 0.34, r: 0.4, color: C.orange, opacity: 0.16 },
-  ],
+  dark: {
+    base: C.dark,
+    seed: 63,
+    grain: 0.4,
+    fields: [
+      { cx: 0.18, cy: 0.3, r: 0.46, color: C.sand, opacity: 0.98 },
+      { cx: 0.82, cy: 0.68, r: 0.44, color: C.orange, opacity: 0.72 },
+      { cx: 0.52, cy: 0.92, r: 0.4, color: C.sage, opacity: 0.6 },
+      { cx: 0.93, cy: 0.12, r: 0.3, color: C.sage, opacity: 0.5 },
+    ],
+  },
+  light: {
+    base: C.cream,
+    seed: 63,
+    grain: 0.4,
+    fields: [
+      { cx: 0.18, cy: 0.3, r: 0.46, color: C.sand, opacity: 0.95 },
+      { cx: 0.82, cy: 0.68, r: 0.44, color: C.orange, opacity: 0.4 },
+      { cx: 0.52, cy: 0.9, r: 0.4, color: C.sage, opacity: 0.7 },
+      { cx: 0.92, cy: 0.14, r: 0.3, color: C.sage, opacity: 0.55 },
+    ],
+  },
 };
 
 /**
@@ -216,7 +208,8 @@ async function main() {
     written.push(await render(`${p.name}-light`, p.light));
     written.push(await render(`${p.name}-dark`, p.dark));
   }
-  written.push(await render("hero-dark", HERO, 1920, 1100));
+  written.push(await render("hero-dark", HERO.dark, 2000, 820));
+  written.push(await render("hero-light", HERO.light, 2000, 820));
   console.log(`wrote ${written.length} background(s) to ${OUT_DIR}`);
 }
 
