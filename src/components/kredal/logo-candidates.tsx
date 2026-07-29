@@ -124,6 +124,57 @@ export function MarkAperture(p: MarkProps) {
   return <Glyph {...p} d={APERTURE_D} />;
 }
 
+/**
+ * K — Rosette. Four blades set in a ring around a diamond core.
+ *
+ * Built from four **annular sectors** rather than by cutting slots through a
+ * disc. That is not a stylistic preference — it is the only construction that
+ * avoids a cross. Slotting a disc with two bars through the centre gives an
+ * upright cross at 0°/90° and a saltire at 45°; both read as crosses, which is
+ * the one thing this mark must not do. Separate sectors never meet at the
+ * centre, so there is no crossing to read.
+ *
+ * None of the five subpaths overlap, so `evenodd` simply fills each — no
+ * winding surprises.
+ */
+const R_OUTER = 28;
+const R_INNER = 13;
+/** Degrees of gap between blades. Below ~9 the gaps close at 16px. */
+const BLADE_GAP = 14;
+
+const pt = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return [
+    (32 + r * Math.cos(a)).toFixed(2),
+    (32 + r * Math.sin(a)).toFixed(2),
+  ] as const;
+};
+
+/** One blade: outer arc out, straight in, inner arc back. */
+function blade(from: number, to: number) {
+  const [ox1, oy1] = pt(from, R_OUTER);
+  const [ox2, oy2] = pt(to, R_OUTER);
+  const [ix2, iy2] = pt(to, R_INNER);
+  const [ix1, iy1] = pt(from, R_INNER);
+  return (
+    `M${ox1} ${oy1} A${R_OUTER} ${R_OUTER} 0 0 1 ${ox2} ${oy2} ` +
+    `L${ix2} ${iy2} A${R_INNER} ${R_INNER} 0 0 0 ${ix1} ${iy1} Z`
+  );
+}
+
+export const ROSETTE_D = [
+  // Gaps centred on the diagonals, blades on the axes.
+  ...[0, 1, 2, 3].map((i) =>
+    blade(i * 90 + BLADE_GAP / 2 + 45, (i + 1) * 90 - BLADE_GAP / 2 + 45)
+  ),
+  // The core, floating free in the ring.
+  "M32 22 L42 32 L32 42 L22 32 Z",
+].join(" ");
+
+export function MarkRosette(p: MarkProps) {
+  return <Glyph {...p} d={ROSETTE_D} />;
+}
+
 export const LOGO_CANDIDATES = [
   {
     key: "H",
@@ -145,5 +196,12 @@ export const LOGO_CANDIDATES = [
     d: APERTURE_D,
     Mark: MarkAperture,
     note: "A solid disc with a wedge cut from its edge and a diamond at its centre. The heaviest silhouette, so it survives smallest, and the only one with an off-centre axis. Watch for: a notched circle is the most generic of the three in fintech.",
+  },
+  {
+    key: "K",
+    name: "Rosette",
+    d: ROSETTE_D,
+    Mark: MarkRosette,
+    note: "Four blades ringing a diamond core — the closest of the set to the supplied reference. Built as four separate sectors rather than a slotted disc, so no rotation of it produces a cross: slotting through the centre gives an upright cross at 0° and a saltire at 45°, and both read as crosses. Watch for: it lands close to a lifebuoy or a ship's wheel, and it carries the most detail, so it is the densest at 16px.",
   },
 ] as const;
