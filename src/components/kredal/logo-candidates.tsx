@@ -85,6 +85,57 @@ export function MarkBracketK(p: MarkProps) {
   );
 }
 
+/**
+ * E — Cut K. Square caps and a heavier stroke, so the counters read as cut out
+ * of the square rather than drawn on top of it. The heaviest of the set at 16px.
+ *
+ * (Deliberately no <mask>: a fixed mask id would be duplicated across every
+ * instance rendered on a page, and these marks appear seven times each.)
+ */
+export function MarkCutK(p: MarkProps) {
+  return (
+    <Frame {...p}>
+      <g
+        stroke="var(--background)"
+        strokeWidth="9"
+        strokeLinecap="square"
+        fill="none"
+      >
+        <path d="M23 17v30" />
+        <path d="M45 17 28 32l17 15" />
+      </g>
+    </Frame>
+  );
+}
+
+/**
+ * F — Split square. One diagonal, two weights: the gap between where a file is
+ * and where a bank needs it. No letterform at all — the wordmark carries the
+ * name.
+ */
+export function MarkSplitSquare(p: MarkProps) {
+  return (
+    <Frame {...p}>
+      {/* The band crosses the middle rather than the corners, so it never meets
+          the rounded edge — no clip path, and so no duplicated element id. */}
+      <path d="M6 46 58 18" {...stroke} strokeWidth={10} />
+    </Frame>
+  );
+}
+
+/**
+ * G — Two-stroke K. The K reduced to a stem and a single chevron: no third leg,
+ * no tick, nothing claiming approval. Closest to a wordmark companion.
+ */
+export function MarkTwoStrokeK(p: MarkProps) {
+  return (
+    <Frame {...p}>
+      <path d="M22 17v30" {...stroke} />
+      <path d="M45 18 26 32l19 14" {...stroke} />
+    </Frame>
+  );
+}
+
 export const LOGO_CANDIDATES = [
   {
     key: "A",
@@ -109,5 +160,23 @@ export const LOGO_CANDIDATES = [
     name: "Bracket K",
     Mark: MarkBracketK,
     note: "K stem beside a data bracket. Signals structured extraction; the most 'software' of the four.",
+  },
+  {
+    key: "E",
+    name: "Cut K",
+    Mark: MarkCutK,
+    note: "Square caps and the heaviest stroke in the set, so the counters read as cut out of the square. The most solid at 16px, and still unmistakably a K there.",
+  },
+  {
+    key: "F",
+    name: "Split square",
+    Mark: MarkSplitSquare,
+    note: "A single diagonal crossing the square — the gap between where a file is and where a bank needs it. The most minimal option, and the most flexible, but it carries no letter, so the wordmark does all the naming.",
+  },
+  {
+    key: "G",
+    name: "Two-stroke K",
+    Mark: MarkTwoStrokeK,
+    note: "The K reduced to a stem and one chevron. No third leg, no tick, nothing implying approval. Quietest of the set; pairs closely with the wordmark.",
   },
 ] as const;

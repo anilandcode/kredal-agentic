@@ -69,12 +69,19 @@ const SPACING = [
   ["space-16", 64],
 ] as const;
 
+/**
+ * The real ladder, derived in globals.css from `--radius: 0.625rem`. These used
+ * to be documented as 4/8/16/24, which no token has ever produced — keep this
+ * table in step with the `calc()` chain in the `@theme` block.
+ */
 const RADII = [
   ["radius-none", "0px"],
-  ["radius-sm", "4px"],
+  ["radius-sm", "6px"],
   ["radius-md", "8px"],
-  ["radius-lg", "16px"],
-  ["radius-xl", "24px"],
+  ["radius-lg", "10px"],
+  ["radius-xl", "14px"],
+  ["radius-2xl", "18px"],
+  ["radius-3xl", "22px"],
   ["radius-full", "9999px"],
 ] as const;
 
