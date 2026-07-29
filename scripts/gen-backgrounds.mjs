@@ -136,35 +136,36 @@ async function render(stage, theme) {
     .extract(band)
     .resize(stage.w, stage.h);
 
-  // Light: hold the painting near its own value so the near-white product card
-  // still separates, and wash it toward cream so it reads as brand art.
-  // Dark: crush it toward ink — a dark UI frame needs the room.
+  // Both themes keep the painting essentially intact — the overlay is a hint of
+  // brand colour, not a veil. The dark variant is only slightly cooled and
+  // dimmed; crushing it toward ink both hid the art and, counter-intuitively,
+  // *reduced* separation from the dark product card, which is nearly black.
   const tuned =
     theme === "light"
-      ? base.modulate({ brightness: 1.04, saturation: 0.92 })
-      : base.modulate({ brightness: 0.62, saturation: 0.85 });
+      ? base.modulate({ brightness: 1.03, saturation: 0.95 })
+      : base.modulate({ brightness: 0.94, saturation: 0.92 });
 
   const layers =
     theme === "light"
       ? [
-          { input: await wash(C.cream, 0.34, stage.w, stage.h), blend: "over" },
-          { input: await wash(C.sand, 0.1, stage.w, stage.h), blend: "over" },
+          { input: await wash(C.cream, 0.12, stage.w, stage.h), blend: "over" },
+          { input: await wash(C.sand, 0.05, stage.w, stage.h), blend: "over" },
         ]
       : [
-          { input: await wash(C.dark, 0.44, stage.w, stage.h), blend: "over" },
-          { input: await wash(C.sand, 0.06, stage.w, stage.h), blend: "overlay" },
+          { input: await wash(C.dark, 0.1, stage.w, stage.h), blend: "over" },
+          { input: await wash(C.sand, 0.04, stage.w, stage.h), blend: "overlay" },
         ];
 
   layers.push({
     input: await grain(stage.w, stage.h),
     blend: "overlay",
-    opacity: 0.35,
+    opacity: 0.22,
   });
 
   const out = resolve(OUT_DIR, `${stage.name}-${theme}.webp`);
   await tuned
     .composite(layers)
-    .webp({ quality: 71, effort: 6 })
+    .webp({ quality: 48, effort: 6 })
     .toFile(out);
   return out;
 }

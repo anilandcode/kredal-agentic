@@ -44,7 +44,7 @@ function Chrome({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full rounded-lg border border-border bg-card p-1.5 shadow-2xl shadow-black/20">
+    <div className="w-full rounded-md border border-border bg-card p-1.5 shadow-2xl shadow-black/20">
       <div className="flex items-center gap-1.5 px-3 py-2">
         <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
         <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
@@ -55,7 +55,7 @@ function Chrome({
       </div>
       {/* Links inside these frames point into /app, which a logged-out visitor
           cannot reach — so the whole surface is inert. */}
-      <div className="pointer-events-none rounded-md bg-background p-5">
+      <div className="pointer-events-none rounded-sm bg-background p-5">
         {children}
       </div>
       <p className="px-3 py-2 text-center text-caption text-muted-foreground">

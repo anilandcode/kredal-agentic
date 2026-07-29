@@ -37,7 +37,7 @@ function ArtStage({
   className?: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl ${className}`}>
+    <div className={`relative overflow-hidden rounded-md ${className}`}>
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center dark:hidden"
@@ -50,7 +50,7 @@ function ArtStage({
       />
       {/* The painted margin: padding here is what makes the art read as a frame. */}
       <div className="relative p-5 sm:p-8 lg:p-12">
-        <div className="overflow-hidden rounded-md shadow-2xl shadow-black/30 ring-1 ring-black/10">
+        <div className="overflow-hidden rounded-sm shadow-2xl shadow-black/30 ring-1 ring-black/10">
           {children}
         </div>
       </div>
@@ -156,7 +156,7 @@ function Showcase({
 }) {
   return (
     <section id={id} className="mx-auto max-w-6xl px-6 py-8 first:pt-16">
-      <div className="rounded-xl border border-border bg-muted p-6 sm:p-8">
+      <div className="rounded-md border border-border bg-muted p-6 sm:p-8">
         {/* Copy always sits on flat panel background — never on the art. The
             stage below spans the full panel so the product UI keeps its real
             proportions instead of cramming into a half-width column. */}
@@ -265,7 +265,7 @@ function AgentsBand() {
           Each one replaces a step a consultant or bank officer does by hand
           today.
         </p>
-        <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-12 grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-2 lg:grid-cols-5">
           {AGENTS.map(([title, body], i) => (
             <div key={title} className="bg-background p-5">
               <span className="text-caption font-medium tabular-nums text-brand">
@@ -322,7 +322,7 @@ function BuiltInTheOpen() {
         {OPEN_PROOF.map((c) => (
           <div
             key={c.title}
-            className="flex flex-col rounded-lg border border-border bg-card p-6"
+            className="flex flex-col rounded-md border border-border bg-card p-6"
           >
             <p className="text-h1 font-bold tabular-nums text-brand">{c.stat}</p>
             <h3 className="mt-3 text-h3 font-semibold">{c.title}</h3>
@@ -407,7 +407,7 @@ function Traction() {
         {TRACTION.map(([n, label]) => (
           <div
             key={label}
-            className="rounded-lg border border-border bg-card p-6"
+            className="rounded-md border border-border bg-card p-6"
           >
             <p className="text-h1 font-bold tabular-nums">{n}</p>
             <p className="mt-2 text-body-sm text-muted-foreground">{label}</p>
@@ -453,7 +453,7 @@ function Team() {
           {FOUNDERS.map((f) => (
             <div
               key={f.name}
-              className="rounded-lg border border-border bg-card p-6"
+              className="rounded-md border border-border bg-card p-6"
             >
               <FounderAvatar src={f.photo} alt={f.name} initials={f.initials} />
               <h3 className="mt-4 text-h3 font-semibold">{f.name}</h3>
