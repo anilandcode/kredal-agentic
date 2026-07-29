@@ -424,7 +424,7 @@ const FOUNDERS = [
   {
     name: "Anil Pervaiz",
     initials: "AP",
-    photo: "/team/anil.jpg",
+    photo: "/team/anil.webp",
     role: "Co-founder & CEO — Product & AI Engineering",
     bio: "AI agents & automation engineer with a decade of design and Webflow craft; built Saaspo, one of the most-visited SaaS design galleries. Built Kredal's ten agents, RAG, and deterministic scoring engine.",
     linkedin: "https://www.linkedin.com/in/anilpervaiz/",
@@ -433,7 +433,7 @@ const FOUNDERS = [
   {
     name: "Zainab Ahmad",
     initials: "ZA",
-    photo: "/team/zainab.jpg",
+    photo: "/team/zainab.webp",
     role: "Co-founder — Design & Brand",
     bio: "Designer leading Kredal's product design, brand, and user experience — turning a compliance-heavy process into something a founder can actually follow.",
     linkedin: "https://www.linkedin.com/in/zainab-ahmad",

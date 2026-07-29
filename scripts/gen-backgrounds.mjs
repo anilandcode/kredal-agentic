@@ -1,22 +1,31 @@
 /**
- * Generates Kredal's painterly background art (see design.md § Background art).
+ * Generates Kredal's background art (see design.md § 3.7).
  *
- * Each wash is composed as an SVG — layered radial colour fields, organic
- * displacement from feTurbulence, a soft blur, and a fine grain layer — then
- * rasterised to WebP so the browser never pays the filter cost.
+ * The art is sourced, not generated: four supplied landscape paintings are
+ * cropped to the wide band each stage actually shows, pushed toward the brand
+ * palette, and emitted as a light/dark pair per stage.
  *
- * Run (no app dependency needed):
- *   cd kredal-app && npx --yes sharp-cli@5 --version >/dev/null   # ensures sharp is fetchable
- *   node scripts/gen-backgrounds.mjs
+ * Two things this script exists to guarantee:
  *
- * If `sharp` is not resolvable, install it once in a scratch dir and run with
- * NODE_PATH pointing at it:
+ *  1. **The signature never ships.** Every source painting carries an
+ *     illegible generated signature along its bottom edge. `BAND_MAX_BOTTOM`
+ *     is the hard ceiling on how far down a crop may reach, and `assertCrop`
+ *     fails the build rather than letting one slip through.
+ *  2. **Payload stays sane.** `ArtStage` renders the light and dark layer
+ *     simultaneously (`dark:hidden` / `hidden dark:block`), so every byte here
+ *     is downloaded twice. Budget is 500 KB for all ten files; the script
+ *     prints the total and complains if it is exceeded.
+ *
+ * Run (sharp resolves transitively via next; no project dependency needed):
+ *   cd kredal-app && node scripts/gen-backgrounds.mjs
+ *
+ * If `sharp` is not resolvable, install it once in a scratch dir:
  *   NODE_PATH=/tmp/gfx/node_modules node scripts/gen-backgrounds.mjs
  *
- * Output: public/backgrounds/*.webp  (committed; regenerate only when the
- * palette in design.md changes).
+ * Output: public/backgrounds/{hero,panel-1..4}-{light,dark}.webp (committed;
+ * regenerate only when the sources or the palette change).
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -24,158 +33,80 @@ import sharp from "sharp";
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(here, "../public/backgrounds");
 
-const W = 1700;
-const H = 760;
+const SRC_DIR =
+  "/Users/apple/Library/CloudStorage/GoogleDrive-you@example.com/My Drive/Ai Projects/AbuDhabi/Images Data ";
+
+/** Every source is 2400×1792. */
+const SRC_W = 2400;
+const SRC_H = 1792;
+
+/**
+ * No crop may extend below this line. The generated signature sits in the
+ * bottom-left of each painting, around y≈1700; this leaves ~150px of margin.
+ */
+const BAND_MAX_BOTTOM = 1550;
 
 /** Brand palette — keep in sync with design.md. */
 const C = {
-  cream: "#f7f7f4",
-  ink: "#26251e",
-  dark: "#14120b",
-  sand: "#dfa88f",
-  sage: "#9fc9a2",
-  orange: "#f54e00",
-  warmCard: "#f3ede6",
-  cardDark: "#1b1913",
+  cream: { r: 247, g: 247, b: 244 },
+  dark: { r: 20, g: 18, b: 11 },
+  sand: { r: 223, g: 168, b: 143 },
+};
+
+const SOURCES = {
+  lochSunset: "Generate_similar_image_different_2K_202607291407.jpg",
+  valleyRoad: "Generate_similar_image_landscape_2K_202607291413.jpg",
+  coralRiver: "Generate_similar_image_different_2K_202607291413.jpg",
+  wideRiver: "Generate_similar_image_different_2K_202607291414.jpg",
 };
 
 /**
- * One painterly wash: a base fill plus soft colour fields, distorted by
- * turbulence for painted edges, finished with a grain overlay.
+ * One stage. `top` picks which horizontal band of the painting is used — vary
+ * it across stages so the set doesn't read as five crops of the same sky.
  */
-function washSVG({ base, fields, seed = 3 }, w = W, h = H) {
-  const blobs = fields
-    .map(
-      ({ color, opacity }, i) => `
-      <radialGradient id="g${i}" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="${color}" stop-opacity="${opacity}"/>
-        <stop offset="55%" stop-color="${color}" stop-opacity="${opacity * 0.5}"/>
-        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
-      </radialGradient>`
-    )
-    .join("");
-
-  const circles = fields
-    .map(
-      ({ cx, cy, r }, i) =>
-        `<ellipse cx="${cx * w}" cy="${cy * h}" rx="${r * w}" ry="${r * h * 1.2}" fill="url(#g${i})"/>`
-    )
-    .join("");
-
-  // Gentle displacement then a heavy blur: enough to break the perfect ellipse
-  // edges into painted shapes, without the hard ring artefacts a large scale
-  // produces where fields overlap.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-  <defs>
-    ${blobs}
-    <filter id="paint" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.0035" numOctaves="3" seed="${seed}" result="warp"/>
-      <feDisplacementMap in="SourceGraphic" in2="warp" scale="55" xChannelSelector="R" yChannelSelector="G"/>
-      <feGaussianBlur stdDeviation="60"/>
-    </filter>
-  </defs>
-  <rect width="${w}" height="${h}" fill="${base}"/>
-  <g filter="url(#paint)">${circles}</g>
-</svg>`;
-}
-
-/** Panel washes — each index shares a hue family across light and dark.
- *
- * Fields are large and overlapping so paint reaches every edge of the stage; a
- * wash whose fields fade back to bare cream reads as an unpainted box, not as
- * art. Copy never sits on these, so they run at full strength.
- */
-const PANELS = [
-  {
-    name: "panel-1", // sand
-    light: { base: C.warmCard, seed: 5, fields: [
-      { cx: 0.18, cy: 0.3, r: 0.62, color: C.sand, opacity: 1 },
-      { cx: 0.78, cy: 0.72, r: 0.55, color: C.sand, opacity: 0.7 },
-      { cx: 0.6, cy: 0.08, r: 0.44, color: C.sage, opacity: 0.6 },
-    ] },
-    dark: { base: C.dark, seed: 5, fields: [
-      { cx: 0.18, cy: 0.3, r: 0.62, color: C.sand, opacity: 0.73 },
-      { cx: 0.78, cy: 0.72, r: 0.55, color: C.sand, opacity: 0.36 },
-      { cx: 0.6, cy: 0.08, r: 0.44, color: C.orange, opacity: 0.32 },
-    ] },
-  },
-  {
-    name: "panel-2", // sage
-    light: { base: C.warmCard, seed: 17, fields: [
-      { cx: 0.76, cy: 0.34, r: 0.62, color: C.sage, opacity: 1 },
-      { cx: 0.22, cy: 0.7, r: 0.55, color: C.sage, opacity: 0.66 },
-      { cx: 0.4, cy: 0.12, r: 0.44, color: C.sand, opacity: 0.72 },
-    ] },
-    dark: { base: C.dark, seed: 17, fields: [
-      { cx: 0.76, cy: 0.34, r: 0.62, color: C.sage, opacity: 0.6 },
-      { cx: 0.22, cy: 0.7, r: 0.55, color: C.sage, opacity: 0.3 },
-      { cx: 0.4, cy: 0.12, r: 0.44, color: C.sand, opacity: 0.34 },
-    ] },
-  },
-  {
-    name: "panel-3", // neutral warm
-    light: { base: C.warmCard, seed: 29, fields: [
-      { cx: 0.3, cy: 0.62, r: 0.64, color: C.sand, opacity: 0.9 },
-      { cx: 0.8, cy: 0.22, r: 0.55, color: C.sage, opacity: 0.8 },
-      { cx: 0.52, cy: 0.95, r: 0.44, color: C.sand, opacity: 0.6 },
-    ] },
-    dark: { base: C.dark, seed: 29, fields: [
-      { cx: 0.3, cy: 0.62, r: 0.64, color: C.sand, opacity: 0.5 },
-      { cx: 0.8, cy: 0.22, r: 0.55, color: C.sage, opacity: 0.38 },
-      { cx: 0.52, cy: 0.95, r: 0.44, color: C.sand, opacity: 0.3 },
-    ] },
-  },
-  {
-    name: "panel-4", // sand + orange
-    light: { base: C.warmCard, seed: 41, fields: [
-      { cx: 0.72, cy: 0.64, r: 0.62, color: C.sand, opacity: 0.95 },
-      { cx: 0.2, cy: 0.26, r: 0.55, color: C.sage, opacity: 0.62 },
-      { cx: 0.9, cy: 0.1, r: 0.36, color: C.orange, opacity: 0.4 },
-    ] },
-    dark: { base: C.dark, seed: 41, fields: [
-      { cx: 0.72, cy: 0.64, r: 0.62, color: C.sand, opacity: 0.66 },
-      { cx: 0.2, cy: 0.26, r: 0.55, color: C.sage, opacity: 0.3 },
-      { cx: 0.9, cy: 0.1, r: 0.36, color: C.orange, opacity: 0.46 },
-    ] },
-  },
+const STAGES = [
+  // The widest, calmest composition carries the headline product shot.
+  { name: "hero", src: SOURCES.valleyRoad, top: 250, w: 2000, h: 820 },
+  { name: "panel-1", src: SOURCES.lochSunset, top: 330, w: 1700, h: 760 },
+  { name: "panel-2", src: SOURCES.coralRiver, top: 180, w: 1700, h: 760 },
+  { name: "panel-3", src: SOURCES.wideRiver, top: 430, w: 1700, h: 760 },
+  // Reuses the hero painting, but from a lower, greener band — and it sits four
+  // panels away from the hero, so the repeat doesn't register.
+  { name: "panel-4", src: SOURCES.valleyRoad, top: 470, w: 1700, h: 760 },
 ];
 
 /**
- * Hero stage: frames the headline product visual. Rendered at the wide, short
- * aspect the stage actually occupies (2000×820) — a taller canvas would put the
- * colour fields outside the `bg-cover` crop and the margin would read as flat.
- * Fields are spread across the full frame so every visible edge is painted.
+ * Fails loudly rather than shipping a signature. Called for every crop.
  */
-const HERO = {
-  dark: {
-    base: C.dark,
-    seed: 63,
-    grain: 0.4,
-    fields: [
-      { cx: 0.18, cy: 0.3, r: 0.46, color: C.sand, opacity: 0.98 },
-      { cx: 0.82, cy: 0.68, r: 0.44, color: C.orange, opacity: 0.72 },
-      { cx: 0.52, cy: 0.92, r: 0.4, color: C.sage, opacity: 0.6 },
-      { cx: 0.93, cy: 0.12, r: 0.3, color: C.sage, opacity: 0.5 },
-    ],
-  },
-  light: {
-    base: C.cream,
-    seed: 63,
-    grain: 0.4,
-    fields: [
-      { cx: 0.18, cy: 0.3, r: 0.46, color: C.sand, opacity: 0.95 },
-      { cx: 0.82, cy: 0.68, r: 0.44, color: C.orange, opacity: 0.4 },
-      { cx: 0.52, cy: 0.9, r: 0.4, color: C.sage, opacity: 0.7 },
-      { cx: 0.92, cy: 0.14, r: 0.3, color: C.sage, opacity: 0.55 },
-    ],
-  },
-};
+function assertCrop({ name, top, height }) {
+  const bottom = top + height;
+  if (bottom > BAND_MAX_BOTTOM) {
+    throw new Error(
+      `${name}: crop reaches y=${bottom}, past the ${BAND_MAX_BOTTOM}px ` +
+        `signature guard. Raise \`top\` or shorten the band.`
+    );
+  }
+  if (top < 0 || top + height > SRC_H) {
+    throw new Error(`${name}: crop falls outside the ${SRC_W}×${SRC_H} source.`);
+  }
+}
 
-/**
- * Fine film grain. librsvg ignores `mix-blend-mode`, so the grain is composited
- * here with sharp instead of inside the SVG.
- */
-async function grainLayer(width, height, sigma) {
+/** A translucent flat colour, for tinting via composite. */
+async function wash({ r, g, b }, alpha, width, height) {
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r, g, b, alpha },
+    },
+  })
+    .png()
+    .toBuffer();
+}
+
+/** Fine film grain, so the art keeps the texture the washes had. */
+async function grain(width, height, sigma = 7) {
   return sharp({
     create: {
       width,
@@ -188,29 +119,83 @@ async function grainLayer(width, height, sigma) {
     .toBuffer();
 }
 
-async function render(name, spec, width = W, height = H) {
-  const svg = washSVG(spec, width, height);
-  const out = resolve(OUT_DIR, `${name}.webp`);
-  const grain = await grainLayer(width, height, spec.grainSigma ?? 9);
+/**
+ * The band, at the stage's aspect. The crop is as wide as the source and as
+ * tall as that aspect allows, so we keep the full sweep of the composition.
+ */
+function bandFor({ w, h, top }) {
+  const height = Math.round((SRC_W * h) / w);
+  return { left: 0, top, width: SRC_W, height };
+}
 
-  await sharp(Buffer.from(svg), { density: 96 })
-    .resize(width, height)
-    .composite([{ input: grain, blend: "overlay", opacity: spec.grain ?? 0.5 }])
-    .webp({ quality: 80, effort: 6 })
+async function render(stage, theme) {
+  const band = bandFor(stage);
+  assertCrop({ name: `${stage.name}-${theme}`, top: band.top, height: band.height });
+
+  const base = sharp(resolve(SRC_DIR, stage.src))
+    .extract(band)
+    .resize(stage.w, stage.h);
+
+  // Light: hold the painting near its own value so the near-white product card
+  // still separates, and wash it toward cream so it reads as brand art.
+  // Dark: crush it toward ink — a dark UI frame needs the room.
+  const tuned =
+    theme === "light"
+      ? base.modulate({ brightness: 1.04, saturation: 0.92 })
+      : base.modulate({ brightness: 0.62, saturation: 0.85 });
+
+  const layers =
+    theme === "light"
+      ? [
+          { input: await wash(C.cream, 0.34, stage.w, stage.h), blend: "over" },
+          { input: await wash(C.sand, 0.1, stage.w, stage.h), blend: "over" },
+        ]
+      : [
+          { input: await wash(C.dark, 0.44, stage.w, stage.h), blend: "over" },
+          { input: await wash(C.sand, 0.06, stage.w, stage.h), blend: "overlay" },
+        ];
+
+  layers.push({
+    input: await grain(stage.w, stage.h),
+    blend: "overlay",
+    opacity: 0.35,
+  });
+
+  const out = resolve(OUT_DIR, `${stage.name}-${theme}.webp`);
+  await tuned
+    .composite(layers)
+    .webp({ quality: 71, effort: 6 })
     .toFile(out);
   return out;
 }
 
+const BUDGET_BYTES = 500 * 1024;
+
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
-  const written = [];
-  for (const p of PANELS) {
-    written.push(await render(`${p.name}-light`, p.light));
-    written.push(await render(`${p.name}-dark`, p.dark));
+
+  let total = 0;
+  for (const stage of STAGES) {
+    for (const theme of ["light", "dark"]) {
+      const file = await render(stage, theme);
+      const bytes = statSync(file).size;
+      total += bytes;
+      console.log(
+        `${stage.name}-${theme}`.padEnd(16),
+        `${stage.w}×${stage.h}`.padEnd(10),
+        `${(bytes / 1024).toFixed(1)} KB`
+      );
+    }
   }
-  written.push(await render("hero-dark", HERO.dark, 2000, 820));
-  written.push(await render("hero-light", HERO.light, 2000, 820));
-  console.log(`wrote ${written.length} background(s) to ${OUT_DIR}`);
+
+  console.log(`\ntotal ${(total / 1024).toFixed(1)} KB across ${STAGES.length * 2} files`);
+  if (total > BUDGET_BYTES) {
+    console.error(
+      `OVER BUDGET by ${((total - BUDGET_BYTES) / 1024).toFixed(1)} KB — ` +
+        `lower webp quality before lowering dimensions.`
+    );
+    process.exitCode = 1;
+  }
 }
 
 main().catch((err) => {
