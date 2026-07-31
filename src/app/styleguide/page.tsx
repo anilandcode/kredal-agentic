@@ -293,7 +293,7 @@ export default function StyleGuidePage() {
 
         <Section
           title="Logo"
-          lead="The K-check monogram: a geometric K whose lower leg resolves into a checkmark — verified, bank-ready. Clearspace of half the mark width; never recolour the mark orange."
+          lead="Six quadrilaterals pinwheeling around a hollow centre. The mark is free-standing — no container square — and inherits the text colour, so one component serves both themes. Clearspace of half the mark width; minimum 16px; never recolour it orange."
         >
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="flex items-center justify-center rounded-2xl border border-border bg-card p-10">

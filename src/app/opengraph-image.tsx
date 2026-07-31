@@ -1,11 +1,10 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "Kredal — UAE SME bank-readiness platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** OG card — Visual Identity v2: K-check mark + wordmark on warm ink. */
+/** OG card — the Kredal mark + wordmark on warm ink. */
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -23,28 +22,27 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <svg width="64" height="64" viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="14" fill="#f7f7f4" />
-            <path
-              d="M22 16v32"
-              stroke="#14120b"
-              strokeWidth="7"
-              strokeLinecap="round"
-            />
-            <path
-              d="M44 16 24 33"
-              stroke="#14120b"
-              strokeWidth="7"
-              strokeLinecap="round"
-            />
-            <path
-              d="m28 37 8 11L50 28"
-              fill="none"
-              stroke="#14120b"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+          <svg width="76" height="76" viewBox="0 0 100 100" fill="none">
+            <g fill="#f7f7f4" opacity="0.9">
+              <path
+                fillOpacity="0.82"
+                d="M12.716 15.7284L2.2854 66.7298L2.3236 66.768L41.753 58.694L44.1095 47.1219L12.716 15.7284Z"
+              />
+              <path
+                fillOpacity="0.82"
+                d="M33.7363 98.1807L84.7183 87.7307L53.3249 56.3373L41.7529 58.694L33.6789 98.1233L33.7363 98.1807Z"
+              />
+              <path
+                fillOpacity="0.82"
+                d="M67.2265 2.78356L16.2255 13.2138L47.619 44.6073L59.2102 42.2315L67.2647 2.82176L67.2265 2.78356Z"
+              />
+              <path
+                fillOpacity="0.82"
+                d="M88.228 85.2164L98.658 34.215L98.6197 34.1767L59.2099 42.2313L56.8341 53.8225L88.228 85.2164Z"
+              />
+              <path d="M2.32373 66.7681L33.6791 98.1234L41.753 58.6941L2.32373 66.7681Z" />
+              <path d="M98.6205 34.1763L67.2651 2.821L59.21 42.2316L98.6205 34.1763Z" />
+            </g>
           </svg>
           <div style={{ fontSize: 44, fontWeight: 600, letterSpacing: -1 }}>
             Kredal
