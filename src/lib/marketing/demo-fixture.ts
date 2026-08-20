@@ -11,11 +11,9 @@
  * libraries used here is pure and deterministic — no Supabase, no `server-only`,
  * no I/O — so this is safe to import from a public page.
  *
- * Dates are pinned absolute on purpose. Several scoring rules measure company
- * age and document expiry against `Date.now()`; relative offsets would make the
- * landing page's score drift silently as months pass. `demo-fixture.test.ts`
- * asserts the resulting score so a rules change surfaces as a failed test
- * rather than a quietly different marketing page.
+ * `demo-fixture.test.ts` pins the resulting score, so any drift — from a rules
+ * change or from the passage of time — surfaces as a failed test rather than a
+ * quietly different marketing page. See the note on company age below.
  */
 import { buildComplianceRadar, type RadarItem } from "@/lib/compliance";
 import { buildReport, type ReportData } from "@/lib/reports/templates";
@@ -30,8 +28,23 @@ import type {
   ReadinessAssessment,
 } from "@/lib/types";
 
-/** Pinned so company-age and expiry rules evaluate identically forever. */
-const INCORPORATED = "2026-02-20";
+/**
+ * Company age is the one input that cannot be frozen by pinning a date.
+ *
+ * Two scoring rules test age against `Date.now()` — under 3 months and under 6
+ * months. A fixed `incorporation_date` freezes the *date* while the *age* keeps
+ * moving, so the company eventually crosses a threshold and the published score
+ * changes on its own. (It did: pinned at 2026-02-20 the score read 47 until the
+ * company passed six months, then became 49.)
+ *
+ * Anchoring 4.5 months back instead puts it squarely inside the 3–6 month band,
+ * far from either edge, so both rules evaluate the same way whenever the site is
+ * built. The score is what we publish, so the score is what gets frozen.
+ */
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+const INCORPORATED = new Date(Date.now() - 4.5 * MONTH_MS)
+  .toISOString()
+  .slice(0, 10);
 /** Stable stand-in for `created_at` columns the UI displays. */
 const SEEDED_AT = "2026-07-01T09:00:00.000Z";
 

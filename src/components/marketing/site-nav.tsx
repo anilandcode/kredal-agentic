@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { KredalLogo } from "@/components/kredal/kredal-logo";
 
-export const DOCS_URL = "https://docs-site-henna-eight.vercel.app";
+export const DOCS_URL = "https://docs.getkredal.com";
 
 /** Marketing nav — 52px, solid background, pill CTA (design.md §4). */
 export function SiteNav() {
