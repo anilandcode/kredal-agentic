@@ -25,7 +25,7 @@ const COLUMNS: { title: string; links: { label: string; href: string; external?:
     title: "Company",
     links: [
       { label: "Why Kredal", href: `${DOCS_URL}/docs/explanation/why-kredal`, external: true },
-      { label: "Contact", href: "mailto:hello@kredal.ae" },
+      { label: "Contact", href: "mailto:hello@getkredal.com" },
     ],
   },
 ];
