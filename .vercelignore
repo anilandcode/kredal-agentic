@@ -1,0 +1,3 @@
+# Supabase edge functions/migrations deploy via the Supabase CLI, not Vercel.
+# Anchored: only the top-level supabase/ dir (NOT src/lib/supabase).
+/supabase
