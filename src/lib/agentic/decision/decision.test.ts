@@ -18,11 +18,20 @@ const judgment = (over: Partial<Judgment<boolean>> = {}): Judgment<boolean> => (
 });
 
 describe("Calibrator", () => {
-  it("returns the raw confidence when there is no history", () => {
+  it("returns the raw confidence when there is no history — edges included", () => {
     const c = new Calibrator();
     expect(c.calibrate(0.35)).toBeCloseTo(0.35, 6);
     expect(c.calibrate(0.3)).toBeCloseTo(0.3, 6);
     expect(c.calibrate(0.72)).toBeCloseTo(0.72, 6);
+    expect(c.calibrate(0.99)).toBeCloseTo(0.99, 6);
+    expect(c.calibrate(0.02)).toBeCloseTo(0.02, 6);
+  });
+
+  it("does not let evidence about one confidence level move trust at another", () => {
+    const c = new Calibrator();
+    c.observe(0.55, false); // one wrong answer at a 55% claim
+    expect(c.calibrate(0.55)).toBeLessThan(0.55);
+    expect(c.calibrate(0.99)).toBeCloseTo(0.99, 6);
   });
 
   it("learns that an overconfident model must not be taken at its word", () => {

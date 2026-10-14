@@ -29,19 +29,50 @@ export function calibrateWith(set: CalibratorSet) {
   };
 }
 
-/** Record a human-checked outcome. Transactional: concurrent reviews both count. */
-export async function recordOutcome(
+export interface Observation {
+  raw: number;
+  correct: boolean;
+}
+
+/**
+ * Record verified outcomes — from a person answering a review, or from a
+ * specimen's ground truth. Transactional, so concurrent runs and reviews all
+ * count; one transaction per (model × kind), however many observations.
+ */
+export async function recordOutcomes(
   model: string | null,
   kind: string,
-  raw: number,
-  wasCorrect: boolean
+  observations: Observation[]
 ): Promise<Calibrator> {
   const ref = collection().doc(calibratorKey(model, kind));
   return firestore().runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const c = new Calibrator(snap.exists ? (snap.data() as CalibratorState) : undefined);
-    c.observe(raw, wasCorrect);
+    for (const o of observations) c.observe(o.raw, o.correct);
     tx.set(ref, { ...c.toJSON(), model, kind, updatedAt: new Date().toISOString() });
     return c;
+  });
+}
+
+export const recordOutcome = (model: string | null, kind: string, raw: number, wasCorrect: boolean) =>
+  recordOutcomes(model, kind, [{ raw, correct: wasCorrect }]);
+
+export async function allCalibrators() {
+  const snap = await collection().get();
+  return snap.docs.map((d) => {
+    const data = d.data() as CalibratorState & { model: string | null; kind: string; updatedAt?: string };
+    const c = new Calibrator(data);
+    return {
+      key: d.id,
+      model: data.model,
+      kind: data.kind,
+      updatedAt: data.updatedAt ?? null,
+      observations: c.observations,
+      ece: c.expectedCalibrationError(),
+      bins: data.bins,
+      curve: c.curve(),
+      /** What a 99% claim is actually worth, after learning. */
+      at99: c.calibrate(0.99),
+    };
   });
 }

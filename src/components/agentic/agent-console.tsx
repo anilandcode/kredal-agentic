@@ -171,7 +171,7 @@ export function AgentConsole({ cases }: { cases: CaseCard[] }) {
         <section>
           <p className="eyebrow">4 · What they concluded</p>
           <div className="mt-4">
-            <RunResults summary={summary} />
+            <RunResults summary={summary} runId={runId ?? undefined} />
           </div>
         </section>
       )}

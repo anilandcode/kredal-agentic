@@ -1,7 +1,37 @@
 import { AlertOctagon, AlertTriangle, ShieldCheck } from "lucide-react";
 import { ScoreGauge } from "@/components/kredal/score-gauge";
-import type { DecisionView, IntegrityView, RunSummaryView } from "@/lib/agentic/view";
+import {
+  answerKey,
+  type AnswerView,
+  type DecisionView,
+  type IntegrityView,
+  type RunSummaryView,
+  type ScreeningView,
+} from "@/lib/agentic/view";
 import { cn } from "@/lib/utils";
+import { ReviewQuestion } from "./review-question";
+
+const SCREEN = {
+  clear: { Icon: ShieldCheck, title: "Screening: clear", box: "bg-muted text-foreground" },
+  review: { Icon: AlertTriangle, title: "Screening: needs a person", box: "bg-risk-medium-bg text-risk-medium-foreground" },
+  hit: { Icon: AlertOctagon, title: "Screening: possible match — escalate", box: "bg-risk-high-bg text-risk-high-foreground" },
+} as const;
+
+function ScreeningPanel({ screening }: { screening: ScreeningView }) {
+  const { Icon, title, box } = SCREEN[screening.status];
+  return (
+    <section className={cn("rounded-lg p-4", box)}>
+      <div className="flex items-start gap-3">
+        <Icon className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+        <div>
+          <p className="text-body-sm font-semibold">{title}</p>
+          <p className="text-body-sm">{screening.summary}</p>
+          <p className="mt-1 text-caption opacity-75">{screening.notice}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const GATE = {
   clear: { Icon: ShieldCheck, title: "Integrity: clear", box: "bg-risk-low-bg text-risk-low-foreground" },
@@ -89,7 +119,16 @@ function Decision({ d }: { d: DecisionView }) {
   );
 }
 
-export function RunResults({ summary }: { summary: RunSummaryView }) {
+export function RunResults({
+  summary,
+  runId,
+  answers,
+}: {
+  summary: RunSummaryView;
+  /** When present, questions can be answered in place. */
+  runId?: string;
+  answers?: Record<string, AnswerView>;
+}) {
   const { range } = summary;
   const settled = range.low === range.high;
   const reviews = summary.decisions.filter((d) => d.action === "review");
@@ -98,6 +137,7 @@ export function RunResults({ summary }: { summary: RunSummaryView }) {
   return (
     <div className="space-y-8">
       {summary.integrity && <IntegrityGate integrity={summary.integrity} />}
+      {summary.screening && <ScreeningPanel screening={summary.screening} />}
       <section className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
         <ScoreGauge score={Math.round(range.expected)} riskLevel={summary.risk} />
         <div>
@@ -135,7 +175,19 @@ export function RunResults({ summary }: { summary: RunSummaryView }) {
       {reviews.length > 0 && (
         <section>
           <h3 className="text-h3 font-semibold">Questions for a person</h3>
-          <ul className="mt-3 space-y-3">{reviews.map((d) => <Decision key={d.id} d={d} />)}</ul>
+          <p className="mt-1 text-body-sm text-muted-foreground">
+            The engine would not decide these alone. Each answer is recorded as a verified outcome and moves that model&apos;s
+            calibration — the next run trusts it exactly as much as it has earned.
+          </p>
+          <ul className="mt-3 space-y-3">
+            {reviews.map((d) =>
+              runId ? (
+                <ReviewQuestion key={d.id} runId={runId} decision={d} answered={answers?.[answerKey(d.id)]} />
+              ) : (
+                <Decision key={d.id} d={d} />
+              )
+            )}
+          </ul>
         </section>
       )}
 

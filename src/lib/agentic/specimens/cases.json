@@ -13,7 +13,9 @@
         "emirate": "Dubai",
         "jurisdiction_type": "mainland",
         "authority_name": "Specimen Economic Licensing Authority",
-        "license_activity_codes": ["4630.12"],
+        "license_activity_codes": [
+          "4630.12"
+        ],
         "incorporation_date": "2025-02-10",
         "office_status": "Ejari registered — warehouse office, Al Quoz",
         "owner_nationality": "Pakistani",
@@ -122,11 +124,33 @@
             "currency": "AED"
           }
         },
-        { "id": "ubo", "type": "ubo_declaration", "file": "ubo-declaration.pdf", "render": "pdf", "truth": {} },
-        { "id": "plan", "type": "business_plan", "file": "business-plan.pdf", "render": "pdf", "truth": {} },
-        { "id": "contract", "type": "invoice_or_contract", "file": "supply-contract.pdf", "render": "pdf", "truth": {} }
+        {
+          "id": "ubo",
+          "type": "ubo_declaration",
+          "file": "ubo-declaration.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "plan",
+          "type": "business_plan",
+          "file": "business-plan.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "contract",
+          "type": "invoice_or_contract",
+          "file": "supply-contract.pdf",
+          "render": "pdf",
+          "truth": {}
+        }
       ],
-      "contract": { "buyer": "Specimen Hypermarkets LLC", "goods": "Dried fruit, nuts and spices, per monthly purchase orders", "annual_value": 1200000 }
+      "contract": {
+        "buyer": "Specimen Hypermarkets LLC",
+        "goods": "Dried fruit, nuts and spices, per monthly purchase orders",
+        "annual_value": 1200000
+      }
     },
     {
       "id": "marina-lantern",
@@ -140,7 +164,9 @@
         "emirate": "Dubai",
         "jurisdiction_type": "mainland",
         "authority_name": "Specimen Economic Licensing Authority",
-        "license_activity_codes": ["8230.01"],
+        "license_activity_codes": [
+          "8230.01"
+        ],
         "incorporation_date": "2024-11-18",
         "office_status": "Ejari registered — office, Dubai Marina",
         "owner_nationality": "Indian",
@@ -215,7 +241,11 @@
           "type": "owner_emirates_id",
           "file": "emirates-id.pdf",
           "render": "pdf",
-          "truth": { "full_name": "Farah Nadeem Siddiqui", "id_last4": "0012", "expiry_date": "2028-02-14" }
+          "truth": {
+            "full_name": "Farah Nadeem Siddiqui",
+            "id_last4": "0012",
+            "expiry_date": "2028-02-14"
+          }
         },
         {
           "id": "tenancy",
@@ -251,11 +281,33 @@
             "mod_date": "D:20261014180500+04'00'"
           }
         },
-        { "id": "ubo", "type": "ubo_declaration", "file": "ubo-declaration.pdf", "render": "pdf", "truth": {} },
-        { "id": "plan", "type": "business_plan", "file": "business-plan.pdf", "render": "pdf", "truth": {} },
-        { "id": "contract", "type": "invoice_or_contract", "file": "events-contract.pdf", "render": "pdf", "truth": {} }
+        {
+          "id": "ubo",
+          "type": "ubo_declaration",
+          "file": "ubo-declaration.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "plan",
+          "type": "business_plan",
+          "file": "business-plan.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "contract",
+          "type": "invoice_or_contract",
+          "file": "events-contract.pdf",
+          "render": "pdf",
+          "truth": {}
+        }
       ],
-      "contract": { "buyer": "Specimen Exhibitions FZ-LLC", "goods": "Event production services for the 2027 product-launch season", "annual_value": 960000 }
+      "contract": {
+        "buyer": "Specimen Exhibitions FZ-LLC",
+        "goods": "Event production services for the 2027 product-launch season",
+        "annual_value": 960000
+      }
     },
     {
       "id": "bluewater-cargo",
@@ -269,7 +321,9 @@
         "emirate": "Ras Al Khaimah",
         "jurisdiction_type": "free_zone",
         "authority_name": "Specimen Free Zone Authority",
-        "license_activity_codes": ["5229.01"],
+        "license_activity_codes": [
+          "5229.01"
+        ],
         "incorporation_date": "2026-07-01",
         "office_status": "Flexi-desk",
         "owner_nationality": "Ghanaian",
@@ -369,6 +423,157 @@
           }
         }
       ]
+    },
+    {
+      "id": "golden-jute",
+      "title": "Golden Jute Trading LLC",
+      "summary": "A clean Sharjah trading company whose owner's name resembles an entry on the watchlist.",
+      "expect": "Every document checks out, but the owner's name resembles a (fictional) listed person whose listing records no date of birth — so the documents cannot rule it out. A critical screening decision: the engine asks a person rather than guess, and learns from the answer.",
+      "jurisdiction": "ae",
+      "company": {
+        "legal_name": "Golden Jute Trading LLC",
+        "trade_license_number": "SPC-SHJ-338190",
+        "emirate": "Sharjah",
+        "jurisdiction_type": "mainland",
+        "authority_name": "Specimen Economic Licensing Authority",
+        "license_activity_codes": [
+          "4641.05"
+        ],
+        "incorporation_date": "2025-05-20",
+        "office_status": "Ejari registered — warehouse office, Industrial Area 4, Sharjah",
+        "owner_nationality": "Bangladeshi",
+        "owner_uae_residency_status": "UAE resident visa",
+        "expected_monthly_turnover_aed": 120000,
+        "target_bank": "Wio Bank",
+        "target_account_type": "Business current account"
+      },
+      "owners": [
+        {
+          "full_name": "Rashed Kamaal Hasan",
+          "nationality": "Bangladeshi",
+          "ownership_percentage": 100,
+          "is_ubo": true,
+          "uae_residency_status": "resident",
+          "passport_country": "Bangladesh"
+        }
+      ],
+      "answers": {
+        "actual_activity_description": "We import jute sacks, hessian fabric and jute yarn from Bangladesh and supply them to packaging manufacturers and agricultural traders in Sharjah and Ajman, on quarterly supply orders paid by bank transfer.",
+        "activity_matches_license": "yes",
+        "high_risk_activity": "no",
+        "expected_monthly_transaction_count": "10_100",
+        "average_transaction_size_aed": "12000",
+        "cash_heavy": "no",
+        "source_of_funds_explanation": "Initial capital of AED 200,000 came from my savings as a procurement manager at a Sharjah packaging company from 2014 to 2025; salary certificates and personal bank statements are available. The company has been funded from customer receipts since mid-2025.",
+        "source_of_funds_evidence_available": "yes",
+        "high_risk_corridor": "no",
+        "ownership_structure_notes": "Sole owner; no corporate shareholders.",
+        "major_customer_countries": "UAE",
+        "major_supplier_countries": "Bangladesh",
+        "import_export": "yes",
+        "corporate_tax_status": "registered",
+        "vat_status": "registered",
+        "has_employees": "yes",
+        "employee_count": "5",
+        "wps_status": "registered",
+        "previously_applied": "no",
+        "previously_rejected": "no"
+      },
+      "documents": [
+        {
+          "id": "licence",
+          "type": "trade_license",
+          "file": "trade-licence.pdf",
+          "render": "pdf",
+          "truth": {
+            "legal_name": "Golden Jute Trading LLC",
+            "license_number": "SPC-SHJ-338190",
+            "activity_codes": "4641.05",
+            "activity_descriptions": "Jute & Textile Products Trading",
+            "issue_date": "2025-05-20",
+            "expiry_date": "2027-05-19",
+            "authority": "Specimen Economic Licensing Authority"
+          }
+        },
+        {
+          "id": "passport",
+          "type": "owner_passport",
+          "file": "passport.pdf",
+          "render": "pdf",
+          "truth": {
+            "full_name": "HASAN RASHED KAMAAL",
+            "nationality": "BANGLADESHI",
+            "passport_number": "SB2208716",
+            "date_of_birth": "1989-09-03",
+            "expiry_date": "2032-06-18"
+          }
+        },
+        {
+          "id": "eid",
+          "type": "owner_emirates_id",
+          "file": "emirates-id.pdf",
+          "render": "pdf",
+          "truth": {
+            "full_name": "Rashed Kamaal Hasan",
+            "id_last4": "0045",
+            "expiry_date": "2027-12-01"
+          }
+        },
+        {
+          "id": "tenancy",
+          "type": "tenancy_or_office_agreement",
+          "file": "tenancy.pdf",
+          "render": "pdf",
+          "truth": {
+            "tenant_name": "Golden Jute Trading LLC",
+            "premises_address": "Warehouse 9, Street 23, Industrial Area 4, Sharjah",
+            "expiry_date": "2027-05-19"
+          }
+        },
+        {
+          "id": "statement",
+          "type": "bank_statement",
+          "file": "bank-statement.pdf",
+          "render": "pdf",
+          "truth": {
+            "account_holder": "GOLDEN JUTE TRADING LLC",
+            "bank_name": "SPECIMEN BANK",
+            "period_start": "2026-09-01",
+            "period_end": "2026-09-30",
+            "opening_balance": "96250.00",
+            "closing_balance": "106714.25",
+            "total_credits": "128400.00",
+            "total_debits": "117935.75",
+            "currency": "AED"
+          }
+        },
+        {
+          "id": "ubo",
+          "type": "ubo_declaration",
+          "file": "ubo-declaration.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "plan",
+          "type": "business_plan",
+          "file": "business-plan.pdf",
+          "render": "pdf",
+          "truth": {}
+        },
+        {
+          "id": "contract",
+          "type": "invoice_or_contract",
+          "file": "supply-contract.pdf",
+          "render": "pdf",
+          "truth": {}
+        }
+      ],
+      "contract": {
+        "buyer": "Specimen Packaging Industries LLC",
+        "goods": "Jute sacks and hessian fabric, per quarterly supply orders",
+        "annual_value": 1050000
+      }
     }
   ]
 }

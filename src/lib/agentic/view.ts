@@ -44,7 +44,15 @@ export interface IntegrityView {
   }[];
 }
 
+export interface ScreeningView {
+  status: "clear" | "review" | "hit";
+  summary: string;
+  notice: string;
+  checked: number;
+}
+
 export interface RunSummaryView {
+  screening?: ScreeningView;
   integrity?: IntegrityView;
   range: { expected: number; low: number; high: number; pending: string[] };
   risk: "low" | "medium" | "high";
@@ -84,9 +92,30 @@ export interface StoredRun {
   durationMs?: number | null;
   heals?: number;
   integrity?: "clear" | "review" | "blocked";
+  answers?: Record<string, AnswerView>;
   error?: string;
   result?: RunSummaryView;
   events: RunEvent[];
+}
+
+export interface AnswerView {
+  answer: boolean;
+  correct: boolean;
+  at: string;
+  message: string;
+}
+
+/** Firestore reads dots in a key as a path; judgment ids contain dots. */
+export const answerKey = (judgmentId: string) => judgmentId.replace(/\./g, "~");
+
+/** Which calibration curve a judgment belongs to — one per skill. */
+export function kindFor(judgmentId: string): string {
+  if (judgmentId.startsWith("read.")) return "field_read";
+  if (judgmentId.startsWith("identity.") || judgmentId.startsWith("account.")) return "name_match";
+  if (judgmentId.startsWith("screening.")) return "screening_match";
+  if (judgmentId.startsWith("integrity.visual")) return "tamper_visual";
+  if (judgmentId.startsWith("integrity.")) return "integrity";
+  return "other";
 }
 
 export const AGENT_LABEL: Record<RunEvent["agent"], string> = {

@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { RunLog, type EventSink } from "./events";
 import { AE } from "./jurisdictions/ae";
-import { calibrateWith, loadCalibrators } from "./learning/calibrators";
+import { calibrateWith, loadCalibrators, recordOutcomes, type Observation } from "./learning/calibrators";
 import { runCase, type RunOutcome } from "./run";
 import { specimenCase } from "./specimens";
 import { appendEvent, runs } from "./store/firestore";
@@ -32,7 +32,7 @@ export interface StartedRun {
 
 /** What a stored run keeps — enough to replay the whole view without re-running. */
 function summarise(outcome: RunOutcome) {
-  const { verdicts, advice, accuracy, integrity } = outcome;
+  const { verdicts, advice, accuracy, integrity, screening } = outcome;
   const decisionView = (d: (typeof verdicts.decisions)[number]) => ({
     id: d.judgment.id,
     question: d.judgment.question,
@@ -48,6 +48,12 @@ function summarise(outcome: RunOutcome) {
     ruleIds: d.judgment.ruleIds,
   });
   return {
+    screening: {
+      status: screening.status,
+      summary: screening.summary,
+      notice: screening.notice,
+      checked: screening.decisions.length,
+    },
     integrity: {
       status: integrity.status,
       pTamper: integrity.pTamper,
@@ -73,7 +79,7 @@ function summarise(outcome: RunOutcome) {
     categoryScores: verdicts.range.asExtracted.categoryScores,
     flags: verdicts.range.asExtracted.flags,
     disagreements: verdicts.disagreements,
-    decisions: [integrity.decision, ...verdicts.decisions].map(decisionView),
+    decisions: [...screening.decisions, integrity.decision, ...verdicts.decisions].map(decisionView),
     questions: verdicts.questions.map((q) => q.judgment.id),
     nextActions: advice.nextActions,
     recovery: advice.recovery,
@@ -143,6 +149,33 @@ export async function startSpecimenRun(opts: StartOptions): Promise<StartedRun> 
       log,
       calibrateWith(calibrators)
     );
+
+    // Learn from the run: every field read against ground truth is a verified
+    // outcome for that model's calibration. (For a real customer the same
+    // outcomes come from people answering the review questions.)
+    if (outcome.accuracy) {
+      const truth = Object.fromEntries(c.documents.map((d) => [d.file, d.truth]));
+      const byModel = new Map<string, Observation[]>();
+      const missed = new Set(outcome.accuracy.misses.map((m) => `${m.file}:${m.field}`));
+      for (const e of outcome.extractions) {
+        for (const field of Object.keys(truth[e.file] ?? {})) {
+          const read = e.fields[field];
+          if (!read || !e.model) continue;
+          const list = byModel.get(e.model) ?? [];
+          list.push({ raw: read.confidence, correct: !missed.has(`${e.file}:${field}`) });
+          byModel.set(e.model, list);
+        }
+      }
+      for (const [model, obs] of byModel) {
+        const cal = await recordOutcomes(model, "field_read", obs);
+        log.emit(
+          "learner",
+          "step",
+          `Learned from ${obs.length} verified reads by ${model}: after ${cal.observations} checked reads, a 99% claim is now trusted at ${(cal.calibrate(0.99) * 100).toFixed(1)}%.`,
+          { model, kind: "field_read", observations: cal.observations, at99: cal.calibrate(0.99), ece: cal.expectedCalibrationError() }
+        );
+      }
+    }
 
     await log.flush();
     await ref.set(

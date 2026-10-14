@@ -4,6 +4,7 @@ import type { CaseProfile } from "../assemble";
 import { decide, noisyOr, type Decision, type Judgment } from "../decision";
 import type { RunLog } from "../events";
 import { describeHistory, readPdfHistory, wasAltered } from "../fraud/pdf-forensics";
+import { screenName, WATCHLIST_NOTICE } from "../fraud/watchlist";
 import type { DocFile } from "./intake";
 import type { Extraction } from "./extractor";
 import { runTypedAgent } from "./run-agent";
@@ -219,4 +220,124 @@ export async function inspectIntegrity(
 
   void profile;
   return { status, pTamper, signals, decision, summary };
+}
+
+// ---------------------------------------------------------------------------
+// Screening
+
+export type ScreeningStatus = "clear" | "review" | "hit";
+
+export interface ScreeningVerdict {
+  status: ScreeningStatus;
+  decisions: Decision<boolean>[];
+  summary: string;
+  notice: string;
+}
+
+const SamePerson = z.object({
+  same_person: z.boolean().describe("True if the applicant is the person on the list entry"),
+  probability: z.number().min(0).max(1).describe("Probability that `same_person` is correct"),
+  rationale: z.string().describe("One or two sentences, citing the facts that decided it"),
+});
+
+/**
+ * Owners against the watchlist. The matcher only finds names worth a closer
+ * look; Gemini weighs date of birth and nationality; the engine routes the
+ * result at the critical bar. A false match blocks an innocent founder; a
+ * missed one is a compliance failure — so anything short of 97% goes to a person.
+ */
+export async function screenOwners(
+  profile: CaseProfile,
+  extractions: (Extraction & { file: string })[],
+  log: RunLog,
+  calibrate: Calibrate
+): Promise<ScreeningVerdict> {
+  log.emit("fraud", "stage", "Screening every owner against the watchlist (demonstration list).");
+  const passport = extractions.find((e) => e.docType === "owner_passport");
+  const decisions: Decision<boolean>[] = [];
+
+  for (const owner of profile.owners) {
+    const names = [owner.full_name, passport?.fields.full_name?.value].filter(Boolean) as string[];
+    const candidates = names.flatMap((n) => screenName(n)).filter(
+      (c, i, all) => all.findIndex((x) => x.entry.id === c.entry.id) === i
+    );
+    if (candidates.length === 0) {
+      log.emit("fraud", "step", `${owner.full_name}: no resembling names on the list.`);
+      continue;
+    }
+
+    for (const cand of candidates) {
+      log.emit("fraud", "warning", `${owner.full_name} resembles list entry ${cand.entry.id} "${cand.matchedOn}" (${Math.round(cand.similarity * 100)}% name similarity) — weighing date of birth and nationality.`);
+      const answer = await runTypedAgent({
+        name: "screening",
+        tier: "fast",
+        log,
+        schema: SamePerson,
+        instruction:
+          "You are a sanctions-screening analyst. Decide whether the applicant is the person on the " +
+          "list entry. Names alone are weak evidence — transliterations collide constantly. A clearly " +
+          "different date of birth is strong evidence of a different person; matching date of birth and " +
+          "nationality is strong evidence of the same one. Be calibrated: if the facts leave real doubt, " +
+          "say so in the probability.",
+        parts: [
+          {
+            text:
+              `Applicant: ${owner.full_name} (passport reads "${passport?.fields.full_name?.value ?? "—"}"), ` +
+              `nationality ${owner.nationality ?? passport?.fields.nationality?.value ?? "unknown"}, ` +
+              `date of birth ${passport?.fields.date_of_birth?.value ?? "unknown"}.\n` +
+              `List entry ${cand.entry.id}: ${cand.entry.name}` +
+              `${cand.entry.aliases.length ? ` (aliases: ${cand.entry.aliases.join("; ")})` : ""}, ` +
+              `date of birth ${cand.entry.dateOfBirth ?? "not listed"}, nationality ${cand.entry.nationality ?? "not listed"}.`,
+          },
+        ],
+      });
+      if (!answer.ok) {
+        log.emit("fraud", "warning", `Screening judgment unavailable for ${cand.entry.id}; a person must review.`);
+        continue;
+      }
+      const raw = answer.value.probability;
+      const p = calibrate(answer.model, "screening_match", raw);
+      const notListed = !answer.value.same_person;
+      const d = decide<boolean>({
+        id: `screening.${cand.entry.id}`,
+        question: `Is ${owner.full_name} a different person from list entry ${cand.entry.id}, "${cand.entry.name}"?`,
+        verdict: notListed,
+        probability: p,
+        rawProbability: raw,
+        severity: "critical",
+        evidence: [
+          { docId: "owner_passport", docType: "owner_passport", field: "date_of_birth", quote: passport?.fields.date_of_birth?.value ?? undefined },
+          { docId: cand.entry.id, docType: "watchlist", quote: `${cand.entry.name}, born ${cand.entry.dateOfBirth ?? "—"}` },
+        ],
+        ruleIds: [],
+        source: "model",
+        model: answer.model ?? undefined,
+        rationale: answer.value.rationale,
+      });
+      decisions.push(d);
+      log.emit("judge", "decision", d.judgment.question, {
+        id: d.judgment.id,
+        action: d.action,
+        reason: d.reason,
+        probability: d.judgment.probability,
+        severity: d.judgment.severity,
+      });
+    }
+  }
+
+  const status: ScreeningStatus = decisions.some((d) => d.action === "review")
+    ? "review"
+    : decisions.some((d) => d.judgment.verdict === false)
+      ? "hit"
+      : "clear";
+  const summary =
+    status === "clear"
+      ? decisions.length
+        ? "Resembling names were checked and ruled out."
+        : "No owner resembles a name on the list."
+      : status === "hit"
+        ? "An owner appears to be the listed person. Do not proceed; escalate to compliance."
+        : "An owner resembles a listed name. A person must confirm it is not the same individual before the file goes further.";
+  log.emit("fraud", "result", `Screening: ${status}. ${summary}`, { status, checked: decisions.length });
+  return { status, decisions, summary, notice: WATCHLIST_NOTICE };
 }

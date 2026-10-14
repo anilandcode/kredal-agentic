@@ -1,7 +1,14 @@
 import "server-only";
 import { advise, type Advice } from "./agents/advisor";
 import { extract, type Extraction } from "./agents/extractor";
-import { inspectIntegrity, inspectVisual, type IntegrityVerdict, type VisualFinding } from "./agents/fraud";
+import {
+  inspectIntegrity,
+  inspectVisual,
+  screenOwners,
+  type IntegrityVerdict,
+  type ScreeningVerdict,
+  type VisualFinding,
+} from "./agents/fraud";
 import { classify, type DocFile, type IntakeResult } from "./agents/intake";
 import { judge, type Verdicts } from "./agents/judge";
 import { verify, type Calibrate } from "./agents/verifier";
@@ -36,6 +43,7 @@ export interface RunOutcome {
   extractions: (Extraction & { file: string })[];
   verdicts: Verdicts;
   integrity: IntegrityVerdict;
+  screening: ScreeningVerdict;
   advice: Advice;
   accuracy: {
     correct: number;
@@ -154,9 +162,10 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
     });
   const scoringInput = assembleScoringInput(input.caseId, input.profile, found);
   // Independent of each other: both need only what was read.
-  const [judgments, integrity] = await Promise.all([
+  const [judgments, integrity, screening] = await Promise.all([
     verify(input.profile, extractions, log, calibrate),
     inspectIntegrity(input.files, extractions, input.profile, log, calibrate, visual),
+    screenOwners(input.profile, extractions, log, calibrate),
   ]);
 
   log.emit("judge", "stage", "Routing every judgment: act on it, or ask a person.");
@@ -190,10 +199,13 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
     severity: integrity.decision.judgment.severity,
   });
   if (integrity.decision.action === "review") verdicts.questions.unshift(integrity.decision);
+  // Critical questions first: screening, then integrity, then the rest.
+  verdicts.questions.unshift(...screening.decisions.filter((d) => d.action === "review"));
 
   // 5. Advise.
   const advice = advise(scoringInput, verdicts, log);
   if (integrity.status !== "clear") advice.nextActions.unshift(integrity.summary);
+  if (screening.status !== "clear") advice.nextActions.unshift(screening.summary);
 
   log.emit("orchestrator", "stage", "Run complete.");
   return {
@@ -201,6 +213,7 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
     extractions,
     verdicts,
     integrity,
+    screening,
     advice,
     accuracy,
   };

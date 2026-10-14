@@ -102,16 +102,21 @@ export class Calibrator {
 
   /**
    * The probability that a model judgment made at `raw` confidence is correct,
-   * given everything humans have checked so far. Linear between bin centres,
-   * flat beyond the outermost ones.
+   * given everything humans have checked so far. Linear between bin centres;
+   * beyond the outermost centres, it continues parallel to the diagonal.
+   *
+   * Not flat: holding the edge flat made an empty curve map 99% to 95%, so a
+   * single wrong answer at 55% — evidence about 55% claims only — appeared to
+   * cut trust in every 99% claim. With no evidence near the edge, the edge
+   * must follow the raw value.
    */
   calibrate(raw: number): number {
     const curve = this.curve();
     const x = clamp01(raw);
     const first = this.center(0);
     const last = this.center(curve.length - 1);
-    if (x <= first) return curve[0];
-    if (x >= last) return curve[curve.length - 1];
+    if (x <= first) return clamp01(curve[0] - (first - x));
+    if (x >= last) return clamp01(curve[curve.length - 1] + (x - last));
     const pos = x * curve.length - 0.5;
     const i = Math.floor(pos);
     const t = pos - i;

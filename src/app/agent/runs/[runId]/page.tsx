@@ -50,7 +50,7 @@ export default async function RunPage({ params }: { params: Promise<{ runId: str
             <section>
               <p className="eyebrow">Conclusions</p>
               <div className="mt-4">
-                <RunResults summary={run.result} />
+                <RunResults summary={run.result} runId={run.id} answers={run.answers} />
               </div>
             </section>
           )}
