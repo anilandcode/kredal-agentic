@@ -71,6 +71,7 @@ export async function allCalibrators() {
       ece: c.expectedCalibrationError(),
       bins: data.bins,
       curve: c.curve(),
+      anchors: c.anchors(),
       /** What a 99% claim is actually worth, after learning. */
       at99: c.calibrate(0.99),
     };

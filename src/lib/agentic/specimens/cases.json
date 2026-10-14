@@ -153,6 +153,121 @@
       }
     },
     {
+      "id": "bluewater-cargo",
+      "title": "Bluewater Cargo FZ-LLC",
+      "summary": "A young free-zone company whose file contradicts itself, submitted with a phone photo of the passport.",
+      "expect": "The licence names a different company; the passport has expired; the bank statement is a personal account; a rejection-recovery plan for the earlier refusal.",
+      "jurisdiction": "ae",
+      "company": {
+        "legal_name": "Bluewater Cargo FZ-LLC",
+        "trade_license_number": "SPC-FZ-117740",
+        "emirate": "Ras Al Khaimah",
+        "jurisdiction_type": "free_zone",
+        "authority_name": "Specimen Free Zone Authority",
+        "license_activity_codes": [
+          "5229.01"
+        ],
+        "incorporation_date": "2026-07-01",
+        "office_status": "Flexi-desk",
+        "owner_nationality": "Ghanaian",
+        "owner_uae_residency_status": "UAE resident visa",
+        "expected_monthly_turnover_aed": 60000,
+        "target_bank": "Emirates NBD",
+        "target_account_type": "Business current account"
+      },
+      "owners": [
+        {
+          "full_name": "Daniel K. Mensah",
+          "nationality": "Ghanaian",
+          "ownership_percentage": 100,
+          "is_ubo": true,
+          "uae_residency_status": "resident",
+          "passport_country": "Ghana"
+        }
+      ],
+      "answers": {
+        "actual_activity_description": "Freight forwarding.",
+        "activity_matches_license": "yes",
+        "high_risk_activity": "no",
+        "expected_monthly_transaction_count": "10_100",
+        "average_transaction_size_aed": "6000",
+        "cash_heavy": "no",
+        "source_of_funds_explanation": "",
+        "source_of_funds_evidence_available": "no",
+        "high_risk_corridor": "no",
+        "ownership_structure_notes": "Sole owner.",
+        "major_customer_countries": "UAE, Ghana",
+        "major_supplier_countries": "UAE",
+        "import_export": "no",
+        "corporate_tax_status": "unknown",
+        "vat_status": "not_yet_registered",
+        "has_employees": "no",
+        "wps_status": "unknown",
+        "previously_applied": "yes",
+        "previously_rejected": "yes",
+        "rejection_bank_name": "Emirates NBD",
+        "rejection_reason": "The company name on the licence did not match the application."
+      },
+      "documents": [
+        {
+          "id": "licence",
+          "type": "trade_license",
+          "file": "trade-licence.pdf",
+          "render": "pdf",
+          "truth": {
+            "legal_name": "Crescent Bay Freight Services FZE",
+            "license_number": "SPC-FZ-117740",
+            "activity_codes": "5229.01",
+            "activity_descriptions": "Freight Forwarding Services",
+            "issue_date": "2026-07-01",
+            "expiry_date": "2027-06-30",
+            "authority": "Specimen Free Zone Authority"
+          }
+        },
+        {
+          "id": "passport",
+          "type": "owner_passport",
+          "file": "passport-scan.jpg",
+          "render": "scan",
+          "truth": {
+            "full_name": "MENSAH KWAME DANIEL",
+            "nationality": "GHANAIAN",
+            "passport_number": "SG7701934",
+            "date_of_birth": "1991-11-03",
+            "expiry_date": "2026-08-02"
+          }
+        },
+        {
+          "id": "tenancy",
+          "type": "tenancy_or_office_agreement",
+          "file": "flexi-desk.pdf",
+          "render": "pdf",
+          "truth": {
+            "tenant_name": "Bluewater Cargo FZ-LLC",
+            "premises_address": "Desk 22, Business Centre B, Specimen Free Zone, Ras Al Khaimah",
+            "expiry_date": "2027-06-30"
+          }
+        },
+        {
+          "id": "statement",
+          "type": "bank_statement",
+          "file": "bank-statement.pdf",
+          "render": "pdf",
+          "truth": {
+            "account_holder": "DANIEL KWAME MENSAH",
+            "bank_name": "SPECIMEN BANK",
+            "period_start": "2026-09-01",
+            "period_end": "2026-09-30",
+            "opening_balance": "18240.00",
+            "closing_balance": "21975.25",
+            "total_credits": "31500.00",
+            "total_debits": "27764.75",
+            "currency": "AED"
+          }
+        }
+      ]
+    },
+    {
       "id": "marina-lantern",
       "title": "Marina Lantern Events LLC",
       "summary": "A strong, complete file from an established events company — with one altered bank statement.",
@@ -308,121 +423,6 @@
         "goods": "Event production services for the 2027 product-launch season",
         "annual_value": 960000
       }
-    },
-    {
-      "id": "bluewater-cargo",
-      "title": "Bluewater Cargo FZ-LLC",
-      "summary": "A young free-zone company whose file contradicts itself, submitted with a phone photo of the passport.",
-      "expect": "The licence names a different company; the passport has expired; the bank statement is a personal account; a rejection-recovery plan for the earlier refusal.",
-      "jurisdiction": "ae",
-      "company": {
-        "legal_name": "Bluewater Cargo FZ-LLC",
-        "trade_license_number": "SPC-FZ-117740",
-        "emirate": "Ras Al Khaimah",
-        "jurisdiction_type": "free_zone",
-        "authority_name": "Specimen Free Zone Authority",
-        "license_activity_codes": [
-          "5229.01"
-        ],
-        "incorporation_date": "2026-07-01",
-        "office_status": "Flexi-desk",
-        "owner_nationality": "Ghanaian",
-        "owner_uae_residency_status": "UAE resident visa",
-        "expected_monthly_turnover_aed": 60000,
-        "target_bank": "Emirates NBD",
-        "target_account_type": "Business current account"
-      },
-      "owners": [
-        {
-          "full_name": "Daniel K. Mensah",
-          "nationality": "Ghanaian",
-          "ownership_percentage": 100,
-          "is_ubo": true,
-          "uae_residency_status": "resident",
-          "passport_country": "Ghana"
-        }
-      ],
-      "answers": {
-        "actual_activity_description": "Freight forwarding.",
-        "activity_matches_license": "yes",
-        "high_risk_activity": "no",
-        "expected_monthly_transaction_count": "10_100",
-        "average_transaction_size_aed": "6000",
-        "cash_heavy": "no",
-        "source_of_funds_explanation": "",
-        "source_of_funds_evidence_available": "no",
-        "high_risk_corridor": "no",
-        "ownership_structure_notes": "Sole owner.",
-        "major_customer_countries": "UAE, Ghana",
-        "major_supplier_countries": "UAE",
-        "import_export": "no",
-        "corporate_tax_status": "unknown",
-        "vat_status": "not_yet_registered",
-        "has_employees": "no",
-        "wps_status": "unknown",
-        "previously_applied": "yes",
-        "previously_rejected": "yes",
-        "rejection_bank_name": "Emirates NBD",
-        "rejection_reason": "The company name on the licence did not match the application."
-      },
-      "documents": [
-        {
-          "id": "licence",
-          "type": "trade_license",
-          "file": "trade-licence.pdf",
-          "render": "pdf",
-          "truth": {
-            "legal_name": "Crescent Bay Freight Services FZE",
-            "license_number": "SPC-FZ-117740",
-            "activity_codes": "5229.01",
-            "activity_descriptions": "Freight Forwarding Services",
-            "issue_date": "2026-07-01",
-            "expiry_date": "2027-06-30",
-            "authority": "Specimen Free Zone Authority"
-          }
-        },
-        {
-          "id": "passport",
-          "type": "owner_passport",
-          "file": "passport-scan.jpg",
-          "render": "scan",
-          "truth": {
-            "full_name": "MENSAH KWAME DANIEL",
-            "nationality": "GHANAIAN",
-            "passport_number": "SG7701934",
-            "date_of_birth": "1991-11-03",
-            "expiry_date": "2026-08-02"
-          }
-        },
-        {
-          "id": "tenancy",
-          "type": "tenancy_or_office_agreement",
-          "file": "flexi-desk.pdf",
-          "render": "pdf",
-          "truth": {
-            "tenant_name": "Bluewater Cargo FZ-LLC",
-            "premises_address": "Desk 22, Business Centre B, Specimen Free Zone, Ras Al Khaimah",
-            "expiry_date": "2027-06-30"
-          }
-        },
-        {
-          "id": "statement",
-          "type": "bank_statement",
-          "file": "bank-statement.pdf",
-          "render": "pdf",
-          "truth": {
-            "account_holder": "DANIEL KWAME MENSAH",
-            "bank_name": "SPECIMEN BANK",
-            "period_start": "2026-09-01",
-            "period_end": "2026-09-30",
-            "opening_balance": "18240.00",
-            "closing_balance": "21975.25",
-            "total_credits": "31500.00",
-            "total_debits": "27764.75",
-            "currency": "AED"
-          }
-        }
-      ]
     },
     {
       "id": "golden-jute",

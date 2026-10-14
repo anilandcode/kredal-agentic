@@ -101,25 +101,48 @@ export class Calibrator {
   }
 
   /**
+   * Where each bin's estimate sits on the confidence axis: at the mean raw
+   * confidence actually observed in it, shrunk toward the bin centre by the
+   * same prior. A bin full of 99% claims describes 99% claims, not 95% ones;
+   * anchoring it at its centre and then extending past it double-counted the
+   * gap and showed a 99% claim as worth 100%. Empty, it is the centre.
+   */
+  anchors(): number[] {
+    const a = this.priorStrength;
+    return this.bins.map((b, i) => (b.sumRaw + a * this.center(i)) / (b.n + a));
+  }
+
+  /**
    * The probability that a model judgment made at `raw` confidence is correct,
-   * given everything humans have checked so far. Linear between bin centres;
-   * beyond the outermost centres, it continues parallel to the diagonal.
+   * given everything humans have checked so far. Linear between anchors.
    *
-   * Not flat: holding the edge flat made an empty curve map 99% to 95%, so a
-   * single wrong answer at 55% — evidence about 55% claims only — appeared to
-   * cut trust in every 99% claim. With no evidence near the edge, the edge
-   * must follow the raw value.
+   * Beyond the outermost anchors, the edge bin's own evidence with the prior
+   * centred on `raw` itself: (correct + a·raw) / (n + a). Two simpler rules
+   * were tried and were wrong. Holding the edge flat made an empty curve map
+   * 99% to 95%, so one wrong answer at 55% appeared to cut trust in every 99%
+   * claim. Extending parallel to the diagonal overshot when a model had been
+   * *under*-confident — 54 of 54 reads right at ~99% claimed came out as
+   * "worth 100%". This rule returns `raw` exactly with no evidence, and never
+   * promises more than the record supports.
    */
   calibrate(raw: number): number {
     const curve = this.curve();
+    const xs = this.anchors();
+    const a = this.priorStrength;
     const x = clamp01(raw);
-    const first = this.center(0);
-    const last = this.center(curve.length - 1);
-    if (x <= first) return clamp01(curve[0] - (first - x));
-    if (x >= last) return clamp01(curve[curve.length - 1] + (x - last));
-    const pos = x * curve.length - 0.5;
-    const i = Math.floor(pos);
-    const t = pos - i;
+    const last = xs.length - 1;
+    if (x <= xs[0]) {
+      const b = this.bins[0];
+      return Math.min(curve[1] ?? 1, (b.correct + a * x) / (b.n + a));
+    }
+    if (x >= xs[last]) {
+      const b = this.bins[last];
+      return Math.max(curve[last - 1] ?? 0, (b.correct + a * x) / (b.n + a));
+    }
+    let i = 0;
+    while (i < last - 1 && xs[i + 1] < x) i++;
+    const span = xs[i + 1] - xs[i];
+    const t = span > 0 ? (x - xs[i]) / span : 0;
     return curve[i] * (1 - t) + curve[i + 1] * t;
   }
 

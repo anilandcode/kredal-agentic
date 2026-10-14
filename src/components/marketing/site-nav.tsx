@@ -30,11 +30,12 @@ export function SiteNav() {
               Docs
             </a>
           </Button>
+          {/* The agentic build has no account system: the demo is the product. */}
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Sign in</Link>
+            <Link href="/agent/learning">How it learns</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/signup">Get started</Link>
+            <Link href="/agent">Run the agents</Link>
           </Button>
         </nav>
       </div>

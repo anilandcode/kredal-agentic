@@ -27,6 +27,14 @@ describe("Calibrator", () => {
     expect(c.calibrate(0.02)).toBeCloseTo(0.02, 6);
   });
 
+  it("never rates a well-earned 99% claim above what the record shows", () => {
+    const c = new Calibrator();
+    for (let i = 0; i < 54; i++) c.observe(0.99, true);
+    const p = c.calibrate(0.99);
+    expect(p).toBeLessThan(1);
+    expect(p).toBeGreaterThan(0.98);
+  });
+
   it("does not let evidence about one confidence level move trust at another", () => {
     const c = new Calibrator();
     c.observe(0.55, false); // one wrong answer at a 55% claim

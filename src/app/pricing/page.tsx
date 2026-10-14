@@ -106,7 +106,7 @@ export default function PricingPage() {
                     {link ? (
                       <a href={link}>Buy now</a>
                     ) : (
-                      <Link href="/signup">Get started</Link>
+                      <Link href="/agent">Try the agents</Link>
                     )}
                   </Button>
                 );

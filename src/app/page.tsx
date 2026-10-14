@@ -74,7 +74,7 @@ function Hero() {
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Button size="lg" asChild>
-            <Link href="/signup">Start your readiness check</Link>
+            <Link href="/agent">Watch the agents check a file</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
             <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
@@ -549,7 +549,7 @@ function ClosingCTA() {
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Button size="lg" asChild>
-            <Link href="/signup">Start your readiness check</Link>
+            <Link href="/agent">Watch the agents check a file</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
             <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
