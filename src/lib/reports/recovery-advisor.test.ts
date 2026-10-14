@@ -28,6 +28,12 @@ describe("categorizeRejection", () => {
     expect(categorizeRejection("incomplete paperwork / expired tenancy")).toBe("documents");
   });
 
+  it("treats documents that contradict each other as a documents problem", () => {
+    expect(categorizeRejection("The company name on the licence did not match the application.")).toBe("documents");
+    expect(categorizeRejection("Owner names differ between passport and MOA")).toBe("documents");
+    expect(categorizeRejection("inconsistent addresses")).toBe("documents");
+  });
+
   it("falls back to unknown for empty or unmatched text", () => {
     expect(categorizeRejection("")).toBe("unknown");
     expect(categorizeRejection("no reason given by branch staff")).toBe("unknown");

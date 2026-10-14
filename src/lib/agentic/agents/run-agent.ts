@@ -36,7 +36,31 @@ export type AgentAnswer<T> =
   | { ok: true; value: T; model: string | null; ms: number }
   | { ok: false; schemaError: string; raw: string; model: string | null; ms: number };
 
-export async function runTypedAgent<S extends z.ZodObject>(
+/**
+ * At most this many model calls in flight per instance. A run fans out one call
+ * per document; unbounded, a single run bursts past the preview models' quota
+ * and turns its own parallelism into 429s.
+ */
+const MAX_IN_FLIGHT = Number(process.env.KREDAL_MAX_MODEL_CALLS ?? 3);
+let inFlight = 0;
+const waiting: (() => void)[] = [];
+
+async function slot<T>(work: () => Promise<T>): Promise<T> {
+  if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((resolve) => waiting.push(resolve));
+  inFlight++;
+  try {
+    return await work();
+  } finally {
+    inFlight--;
+    waiting.shift()?.();
+  }
+}
+
+export function runTypedAgent<S extends z.ZodObject>(call: AgentCall<S>): Promise<AgentAnswer<z.infer<S>>> {
+  return slot(() => runTypedAgentNow(call));
+}
+
+async function runTypedAgentNow<S extends z.ZodObject>(
   call: AgentCall<S>
 ): Promise<AgentAnswer<z.infer<S>>> {
   let model: string | null = null;

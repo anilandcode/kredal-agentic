@@ -42,7 +42,9 @@ const CAUSE_MATCHERS: { cause: RejectionCause; pattern: RegExp }[] = [
   },
   {
     cause: "documents",
-    pattern: /document|paperwork|incomplete|missing|expired|licen[cs]e cop|attestation|ejari|tenancy/i,
+    // Includes inconsistency between documents — the most common rejection of
+    // all ("the name on the licence did not match the application").
+    pattern: /document|paperwork|incomplete|missing|expired|licen[cs]e cop|attestation|ejari|tenancy|inconsisten|mismatch|did ?n[o']?t match|does ?n[o']?t match|\bnames?\b[^.]*\bdiffer/i,
   },
 ];
 
@@ -93,7 +95,9 @@ const PLAYBOOK: Record<RejectionCause, { label: string; steps: string[]; timelin
     timeline: "Immediate (re-target), or 3–6 months (build turnover history)",
   },
   unknown: {
-    label: "Reason not recorded",
+    // Also reached when a reason *was* given but matches no known cause, so it
+    // must not claim that nothing was recorded.
+    label: "Cause not identified from the stated reason",
     steps: [
       "Ask the bank for the rejection reason in writing — most will state it on request.",
       "Meanwhile, resolve every high-severity flag in your current assessment; they are the most likely causes.",

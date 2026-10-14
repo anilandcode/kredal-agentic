@@ -130,8 +130,8 @@
     {
       "id": "bluewater-cargo",
       "title": "Bluewater Cargo FZ-LLC",
-      "summary": "A young free-zone company whose file contradicts itself — and whose passport scan is hard to read.",
-      "expect": "Licence name contradicts the profile; passport expired; the blurred scan forces a stronger second reading; several questions for a person.",
+      "summary": "A young free-zone company whose file contradicts itself, submitted with a phone photo of the passport.",
+      "expect": "The licence names a different company; the passport has expired; the bank statement is a personal account; a rejection-recovery plan for the earlier refusal.",
       "jurisdiction": "ae",
       "company": {
         "legal_name": "Bluewater Cargo FZ-LLC",
