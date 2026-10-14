@@ -1,0 +1,14 @@
+# What `gcloud run deploy --source` uploads to the source bucket.
+#
+# .dockerignore does NOT govern this upload — it only applies inside the image
+# build, after the files have already left this machine. Without this file
+# gcloud silently falls back to .gitignore; spelling it out means a future
+# .gitignore edit can never ship a secret to the bucket.
+
+#!include:.gitignore
+
+.env*
+!.env.local.example
+.git
+node_modules
+.next
