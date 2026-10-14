@@ -3,6 +3,7 @@ import {
   SCORING_CATEGORIES,
   SCORING_RULES,
   type ScoringInput,
+  type ScoringRule,
 } from "@/lib/scoring/rules";
 import type { CategoryScore, ReadinessFlag, RiskLevel } from "@/lib/types";
 
@@ -30,8 +31,15 @@ function categoryLabelFor(score: number, max: number): string {
 /**
  * Deterministic readiness scoring (TECH_SPEC.md §6). Rules live declaratively in
  * `rules.ts`; this function evaluates them, per category, into a score + flags.
+ *
+ * `rules` defaults to the published catalog. The agentic layer passes a variant
+ * with some rules' outcomes pinned, to score a file whose AI-read inputs are
+ * still awaiting a human (see `agentic/decision/readiness.ts`).
  */
-export function calculateReadiness(input: ScoringInput): ScoringResult {
+export function calculateReadiness(
+  input: ScoringInput,
+  rules: readonly ScoringRule[] = SCORING_RULES
+): ScoringResult {
   const categoryScores: Record<string, CategoryScore> = {};
   const flags: ReadinessFlag[] = [];
   let overallScore = 0;
@@ -40,7 +48,7 @@ export function calculateReadiness(input: ScoringInput): ScoringResult {
     let deductions = 0;
     const categoryFlags: ReadinessFlag[] = [];
 
-    for (const rule of SCORING_RULES) {
+    for (const rule of rules) {
       if (rule.category !== category.id) continue;
       if (!rule.when(input)) continue;
       deductions += rule.points;

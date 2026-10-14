@@ -156,8 +156,12 @@ function extractedDoc(
   return null;
 }
 
-/** Loose, order-tolerant name comparison. True unless a clear disagreement. */
-function namesRoughlyMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+/**
+ * Loose, order-tolerant name comparison. True unless a clear disagreement.
+ * Exported for the agentic Verifier, which uses it as its deterministic first
+ * pass before asking a model about transliteration.
+ */
+export function namesRoughlyMatch(a: string | null | undefined, b: string | null | undefined): boolean {
   if (!a || !b) return true;
   const tokens = (s: string) =>
     s
