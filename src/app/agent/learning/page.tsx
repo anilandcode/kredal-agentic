@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ReliabilityChart } from "@/components/agentic/reliability-chart";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteNav } from "@/components/marketing/site-nav";
+import { trustPct } from "@/lib/agentic/decision";
 import { allCalibrators } from "@/lib/agentic/learning/calibrators";
 import { firestore, recentRuns } from "@/lib/agentic/store/firestore";
 
@@ -105,7 +106,7 @@ export default async function LearningPage() {
                     </div>
                     <div>
                       <dt className="text-muted-foreground">A 99% claim is worth</dt>
-                      <dd className="font-mono">{pct(c.at99, 1)}</dd>
+                      <dd className="font-mono">{trustPct(c.at99)}</dd>
                     </div>
                   </dl>
                 </div>

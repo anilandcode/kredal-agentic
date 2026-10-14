@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import type { CaseProfile } from "../assemble";
-import { decide, noisyOr, type Decision, type Judgment } from "../decision";
+import { decide, noisyOr, trustPct, type Decision, type Judgment } from "../decision";
 import type { RunLog } from "../events";
 import { describeHistory, readPdfHistory, wasAltered } from "../fraud/pdf-forensics";
 import { screenName, WATCHLIST_NOTICE } from "../fraud/watchlist";
@@ -214,8 +214,8 @@ export async function inspectIntegrity(
     status === "clear"
       ? "No sign that any document was altered."
       : status === "blocked"
-        ? `Do not submit: a document appears to have been altered (${Math.round(pTamper * 100)}% likely). Ask the bank for a fresh original.`
-        : `Possible alteration (${Math.round(pTamper * 100)}%) — a person should compare the statement with one obtained directly from the bank.`;
+        ? `Do not submit: a document appears to have been altered (${trustPct(pTamper)} likely). Ask the bank for a fresh original.`
+        : `Possible alteration (${trustPct(pTamper)}) — a person should compare the statement with one obtained directly from the bank.`;
   log.emit("fraud", "result", `Integrity: ${status}. ${summary}`, { status, pTamper, signals: signals.length });
 
   void profile;

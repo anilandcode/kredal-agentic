@@ -38,6 +38,13 @@ export interface CalibratorState {
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
+/**
+ * A trust level for display, to one decimal, rounded *down*: 99.95% must read
+ * 99.9%, never 100.0%. Showing certainty the record does not support is the
+ * one thing a calibration display must not do.
+ */
+export const trustPct = (p: number) => `${(Math.floor(clamp01(p) * 1000) / 10).toFixed(1)}%`;
+
 export class Calibrator {
   private readonly bins: CalibrationBin[];
   private readonly priorStrength: number;

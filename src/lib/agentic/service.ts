@@ -2,6 +2,7 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { trustPct } from "./decision";
 import { RunLog, type EventSink } from "./events";
 import { AE } from "./jurisdictions/ae";
 import { calibrateWith, loadCalibrators, recordOutcomes, type Observation } from "./learning/calibrators";
@@ -171,7 +172,7 @@ export async function startSpecimenRun(opts: StartOptions): Promise<StartedRun> 
         log.emit(
           "learner",
           "step",
-          `Learned from ${obs.length} verified reads by ${model}: after ${cal.observations} checked reads, a 99% claim is now trusted at ${(cal.calibrate(0.99) * 100).toFixed(1)}%.`,
+          `Learned from ${obs.length} verified reads by ${model}: after ${cal.observations} checked reads, a 99% claim is now trusted at ${trustPct(cal.calibrate(0.99))}.`,
           { model, kind: "field_read", observations: cal.observations, at99: cal.calibrate(0.99), ece: cal.expectedCalibrationError() }
         );
       }

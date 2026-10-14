@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Calibrator } from "./calibration";
+import { Calibrator, trustPct } from "./calibration";
 import { decide, ACT_THRESHOLD } from "./policy";
 import { noisyOr, poolLogOdds, scoreWithUncertainty } from "./aggregate";
 import type { Decision, Judgment } from "./types";
@@ -71,6 +71,12 @@ describe("Calibrator", () => {
     const honest = new Calibrator();
     for (let i = 0; i < 100; i++) honest.observe(0.7, i < 70);
     expect(honest.expectedCalibrationError()).toBeLessThan(0.01);
+  });
+
+  it("never displays certainty it does not have", () => {
+    expect(trustPct(0.99953)).toBe("99.9%");
+    expect(trustPct(1)).toBe("100.0%");
+    expect(trustPct(0.5)).toBe("50.0%");
   });
 
   it("survives a round trip through storage", () => {
