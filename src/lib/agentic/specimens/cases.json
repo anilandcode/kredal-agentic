@@ -125,7 +125,137 @@
         { "id": "ubo", "type": "ubo_declaration", "file": "ubo-declaration.pdf", "render": "pdf", "truth": {} },
         { "id": "plan", "type": "business_plan", "file": "business-plan.pdf", "render": "pdf", "truth": {} },
         { "id": "contract", "type": "invoice_or_contract", "file": "supply-contract.pdf", "render": "pdf", "truth": {} }
-      ]
+      ],
+      "contract": { "buyer": "Specimen Hypermarkets LLC", "goods": "Dried fruit, nuts and spices, per monthly purchase orders", "annual_value": 1200000 }
+    },
+    {
+      "id": "marina-lantern",
+      "title": "Marina Lantern Events LLC",
+      "summary": "A strong, complete file from an established events company — with one altered bank statement.",
+      "expect": "Readiness looks strong, but the Fraud Sentinel finds the statement was edited: the arithmetic no longer adds up, the closing balance is printed differently, and the PDF was re-saved by another program. Integrity gate: do not submit.",
+      "jurisdiction": "ae",
+      "company": {
+        "legal_name": "Marina Lantern Events LLC",
+        "trade_license_number": "SPC-DXB-562304",
+        "emirate": "Dubai",
+        "jurisdiction_type": "mainland",
+        "authority_name": "Specimen Economic Licensing Authority",
+        "license_activity_codes": ["8230.01"],
+        "incorporation_date": "2024-11-18",
+        "office_status": "Ejari registered — office, Dubai Marina",
+        "owner_nationality": "Indian",
+        "owner_uae_residency_status": "UAE resident visa",
+        "expected_monthly_turnover_aed": 150000,
+        "target_bank": "RAKBANK",
+        "target_account_type": "Business current account"
+      },
+      "owners": [
+        {
+          "full_name": "Farah Nadeem Siddiqui",
+          "nationality": "Indian",
+          "ownership_percentage": 100,
+          "is_ubo": true,
+          "uae_residency_status": "resident",
+          "passport_country": "India"
+        }
+      ],
+      "answers": {
+        "actual_activity_description": "We organise corporate events and product launches in Dubai — venue sourcing, staging, audio-visual and catering coordination — for more than twenty-five corporate clients, invoiced per event with a 50% deposit on signing.",
+        "activity_matches_license": "yes",
+        "high_risk_activity": "no",
+        "expected_monthly_transaction_count": "10_100",
+        "average_transaction_size_aed": "18000",
+        "cash_heavy": "no",
+        "source_of_funds_explanation": "Initial capital of AED 250,000 came from my savings as an events director at a Dubai hospitality group from 2016 to 2024; salary certificates and the corresponding personal bank statements are available. The company has been funded from client deposits since early 2025.",
+        "source_of_funds_evidence_available": "yes",
+        "high_risk_corridor": "no",
+        "ownership_structure_notes": "Sole owner; no corporate shareholders.",
+        "major_customer_countries": "UAE",
+        "major_supplier_countries": "UAE",
+        "import_export": "no",
+        "corporate_tax_status": "registered",
+        "vat_status": "registered",
+        "has_employees": "yes",
+        "employee_count": "9",
+        "wps_status": "registered",
+        "previously_applied": "no",
+        "previously_rejected": "no"
+      },
+      "documents": [
+        {
+          "id": "licence",
+          "type": "trade_license",
+          "file": "trade-licence.pdf",
+          "render": "pdf",
+          "truth": {
+            "legal_name": "Marina Lantern Events LLC",
+            "license_number": "SPC-DXB-562304",
+            "activity_codes": "8230.01",
+            "activity_descriptions": "Events Management Services",
+            "issue_date": "2024-11-18",
+            "expiry_date": "2026-11-17",
+            "authority": "Specimen Economic Licensing Authority"
+          }
+        },
+        {
+          "id": "passport",
+          "type": "owner_passport",
+          "file": "passport.pdf",
+          "render": "pdf",
+          "truth": {
+            "full_name": "SIDDIQUI FARAH NADEEM",
+            "nationality": "INDIAN",
+            "passport_number": "SN4471025",
+            "date_of_birth": "1986-03-22",
+            "expiry_date": "2033-01-09"
+          }
+        },
+        {
+          "id": "eid",
+          "type": "owner_emirates_id",
+          "file": "emirates-id.pdf",
+          "render": "pdf",
+          "truth": { "full_name": "Farah Nadeem Siddiqui", "id_last4": "0012", "expiry_date": "2028-02-14" }
+        },
+        {
+          "id": "tenancy",
+          "type": "tenancy_or_office_agreement",
+          "file": "tenancy.pdf",
+          "render": "pdf",
+          "truth": {
+            "tenant_name": "Marina Lantern Events LLC",
+            "premises_address": "Office 1407, Marina Plaza Specimen Tower, Dubai Marina, Dubai",
+            "expiry_date": "2027-03-31"
+          }
+        },
+        {
+          "id": "statement",
+          "type": "bank_statement",
+          "file": "bank-statement.pdf",
+          "render": "pdf",
+          "truth": {
+            "account_holder": "MARINA LANTERN EVENTS LLC",
+            "bank_name": "SPECIMEN BANK",
+            "period_start": "2026-09-01",
+            "period_end": "2026-09-30",
+            "opening_balance": "205400.00",
+            "closing_balance": "1225849.60",
+            "total_credits": "162300.00",
+            "total_debits": "141850.40",
+            "currency": "AED"
+          },
+          "tamper": {
+            "_note": "The printed closing balance was inflated by AED 1,000,000. The transactions still end at the real balance, the figure is set in a different font, and the file carries an incremental re-save by another program.",
+            "actual_closing_balance": "225849.60",
+            "producer": "SpecimenPDF Editor 2.1",
+            "mod_date": "D:20261014180500+04'00'"
+          }
+        },
+        { "id": "ubo", "type": "ubo_declaration", "file": "ubo-declaration.pdf", "render": "pdf", "truth": {} },
+        { "id": "plan", "type": "business_plan", "file": "business-plan.pdf", "render": "pdf", "truth": {} },
+        { "id": "contract", "type": "invoice_or_contract", "file": "events-contract.pdf", "render": "pdf", "truth": {} }
+      ],
+      "contract": { "buyer": "Specimen Exhibitions FZ-LLC", "goods": "Event production services for the 2027 product-launch season", "annual_value": 960000 }
     },
     {
       "id": "bluewater-cargo",

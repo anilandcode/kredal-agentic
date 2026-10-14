@@ -1,6 +1,7 @@
 import "server-only";
 import { advise, type Advice } from "./agents/advisor";
 import { extract, type Extraction } from "./agents/extractor";
+import { inspectIntegrity, inspectVisual, type IntegrityVerdict, type VisualFinding } from "./agents/fraud";
 import { classify, type DocFile, type IntakeResult } from "./agents/intake";
 import { judge, type Verdicts } from "./agents/judge";
 import { verify, type Calibrate } from "./agents/verifier";
@@ -34,6 +35,7 @@ export interface RunOutcome {
   intake: (IntakeResult & { file: string })[];
   extractions: (Extraction & { file: string })[];
   verdicts: Verdicts;
+  integrity: IntegrityVerdict;
   advice: Advice;
   accuracy: {
     correct: number;
@@ -80,6 +82,17 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
       }
       return { file, r };
     })
+  );
+
+  // The Fraud Sentinel's visual inspection needs only the file, so it starts now
+  // and runs alongside extraction; it is collected in the integrity stage.
+  const visual = new Map<string, Promise<VisualFinding | null>>(
+    classified
+      .filter(({ r }) => r?.doc_type === "bank_statement")
+      .map(({ file }) => {
+        log.emit("fraud", "step", `${file.name}: visual inspection started on the strong tier, alongside extraction.`);
+        return [file.name, inspectVisual(file, log, calibrate)];
+      })
   );
 
   // 2. Extraction — only document types that have fields to read.
@@ -140,7 +153,11 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
       };
     });
   const scoringInput = assembleScoringInput(input.caseId, input.profile, found);
-  const judgments = await verify(input.profile, extractions, log, calibrate);
+  // Independent of each other: both need only what was read.
+  const [judgments, integrity] = await Promise.all([
+    verify(input.profile, extractions, log, calibrate),
+    inspectIntegrity(input.files, extractions, input.profile, log, calibrate, visual),
+  ]);
 
   log.emit("judge", "stage", "Routing every judgment: act on it, or ask a person.");
   const verdicts = judge(scoringInput, judgments, pack.rules);
@@ -164,14 +181,26 @@ export async function runCase(input: RunInput, log: RunLog, calibrate: Calibrate
     { expected, low, high, pending, risk: verdicts.range.asExtracted.riskLevel, disagreements: verdicts.disagreements }
   );
 
+  // The integrity decision is routed like any other; a review joins the questions.
+  log.emit("judge", "decision", integrity.decision.judgment.question, {
+    id: integrity.decision.judgment.id,
+    action: integrity.decision.action,
+    reason: integrity.decision.reason,
+    probability: integrity.decision.judgment.probability,
+    severity: integrity.decision.judgment.severity,
+  });
+  if (integrity.decision.action === "review") verdicts.questions.unshift(integrity.decision);
+
   // 5. Advise.
   const advice = advise(scoringInput, verdicts, log);
+  if (integrity.status !== "clear") advice.nextActions.unshift(integrity.summary);
 
   log.emit("orchestrator", "stage", "Run complete.");
   return {
     intake: classified.filter(({ r }) => r).map(({ file, r }) => ({ ...r!, file: file.name })),
     extractions,
     verdicts,
+    integrity,
     advice,
     accuracy,
   };

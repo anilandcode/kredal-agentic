@@ -1,6 +1,46 @@
+import { AlertOctagon, AlertTriangle, ShieldCheck } from "lucide-react";
 import { ScoreGauge } from "@/components/kredal/score-gauge";
-import type { DecisionView, RunSummaryView } from "@/lib/agentic/view";
+import type { DecisionView, IntegrityView, RunSummaryView } from "@/lib/agentic/view";
 import { cn } from "@/lib/utils";
+
+const GATE = {
+  clear: { Icon: ShieldCheck, title: "Integrity: clear", box: "bg-risk-low-bg text-risk-low-foreground" },
+  review: { Icon: AlertTriangle, title: "Integrity: needs a person", box: "bg-risk-medium-bg text-risk-medium-foreground" },
+  blocked: { Icon: AlertOctagon, title: "Integrity: do not submit", box: "bg-risk-high-bg text-risk-high-foreground" },
+} as const;
+
+/**
+ * Sits above the score on purpose. An altered document does not make a file
+ * weaker — it makes it unsubmittable, whatever the readiness number says.
+ */
+function IntegrityGate({ integrity }: { integrity: IntegrityView }) {
+  const { Icon, title, box } = GATE[integrity.status];
+  const raised = integrity.signals.filter((s) => !s.verdict);
+  return (
+    <section className={cn("rounded-lg p-5", box)}>
+      <div className="flex items-start gap-3">
+        <Icon className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden />
+        <div className="min-w-0">
+          <p className="text-h3 font-semibold">{title}</p>
+          <p className="mt-1 text-body-sm">{integrity.summary}</p>
+        </div>
+      </div>
+      {raised.length > 0 && (
+        <ul className="mt-4 space-y-2 border-t border-current/15 pt-4 text-body-sm">
+          {raised.map((s) => (
+            <li key={s.id}>
+              <span className="font-medium">{s.source === "rule" ? "Fact" : `Gemini (${pct(s.probability)})`}:</span>{" "}
+              {s.rationale}
+              {s.evidence.length > 0 && s.source === "model" && (
+                <span className="block text-caption opacity-80">{s.evidence.join(" · ")}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
 
 /**
  * What the agents concluded: the score (as a range while anything is pending),
@@ -57,6 +97,7 @@ export function RunResults({ summary }: { summary: RunSummaryView }) {
 
   return (
     <div className="space-y-8">
+      {summary.integrity && <IntegrityGate integrity={summary.integrity} />}
       <section className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
         <ScoreGauge score={Math.round(range.expected)} riskLevel={summary.risk} />
         <div>

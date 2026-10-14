@@ -123,7 +123,7 @@ const T = {
       <div style="display:flex;gap:6mm;margin-top:4mm">
         <div style="width:24mm;height:30mm;background:linear-gradient(#d9d6cd,#bcb8ad);border-radius:2mm"></div>
         <div style="font-size:11px;line-height:1.5">
-          <div><span class="muted">ID Number</span><br><b>784-1988-000${t.id_last4.slice(0, 3)}${t.id_last4.slice(3)}-${t.id_last4.slice(3)}</b></div>
+          <div><span class="muted">ID Number</span><br><b>784-1988-0000${t.id_last4.slice(0, 3)}-${t.id_last4.slice(3)}</b></div>
           <div><span class="muted">Name</span><br><b>${esc(t.full_name)}</b></div>
           <div><span class="muted">Expiry date</span><br>${human(t.expiry_date)}</div>
         </div></div>`,
@@ -149,7 +149,16 @@ const T = {
     </table>
     <div class="seal">SPECIMEN<br>LANDLORD<br>STAMP</div>`),
 
-  bank_statement: (c, t) => {
+  bank_statement: (c, t, doc) => {
+    // A tampered statement prints an inflated closing balance, but its
+    // transactions still run to the real one — exactly the inconsistency an
+    // altered statement shows. The edited figure is also set in a different
+    // face and nudged off the baseline, as pasted-over text tends to be.
+    const tamper = doc.tamper;
+    const reconcileTo = tamper ? tamper.actual_closing_balance : t.closing_balance;
+    const closingCell = tamper
+      ? `<b style="font-family:Georgia,'Times New Roman',serif;font-size:13.5px;position:relative;top:1.5px;left:2px;letter-spacing:.2px">${money(t.closing_balance)}</b>`
+      : `<b>${money(t.closing_balance)}</b>`;
     // Spread the stated totals over a month of transactions that add up exactly.
     const credits = split(Number(t.total_credits), 5);
     const debits = split(Number(t.total_debits), 6);
@@ -164,7 +173,7 @@ const T = {
       bal = Math.round((bal + (m.cr ?? 0) - (m.dr ?? 0)) * 100) / 100;
       rows.push(`<tr><td>${String(m.day).padStart(2, "0")} ${MONTHS[Number(t.period_start.slice(5, 7)) - 1]}</td><td>${m.desc}</td><td class="n">${m.dr ? money(m.dr) : ""}</td><td class="n">${m.cr ? money(m.cr) : ""}</td><td class="n">${money(bal)}</td></tr>`);
     }
-    if (Math.abs(bal - Number(t.closing_balance)) > 0.005) throw new Error(`statement for ${t.account_holder} does not balance: ${bal} vs ${t.closing_balance}`);
+    if (Math.abs(bal - Number(reconcileTo)) > 0.005) throw new Error(`statement for ${t.account_holder} does not balance: ${bal} vs ${reconcileTo}`);
     return shell(`
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div><h1>${esc(t.bank_name)}</h1><div class="muted">Fictional bank · specimen statement</div></div>
@@ -180,7 +189,7 @@ const T = {
       <tr><td class="k">Opening balance</td><td class="n">${money(t.opening_balance)}</td></tr>
       <tr><td class="k">Total credits</td><td class="n">${money(t.total_credits)}</td></tr>
       <tr><td class="k">Total debits</td><td class="n">${money(t.total_debits)}</td></tr>
-      <tr><td class="k"><b>Closing balance</b></td><td class="n"><b>${money(t.closing_balance)}</b></td></tr>
+      <tr><td class="k"><b>Closing balance</b></td><td class="n">${closingCell}</td></tr>
     </table>
     <h2>Transactions</h2>
     <table><tr><th>Date</th><th>Description</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Balance</th></tr>${rows.join("")}</table>`);
@@ -213,10 +222,10 @@ const T = {
     <div class="muted">Specimen agreement no. SA-2026-0412</div>
     <h2>Parties</h2>
     <table><tr><td class="k">Supplier</td><td><b>${esc(c.company.legal_name)}</b></td></tr>
-      <tr><td class="k">Buyer</td><td>Specimen Hypermarkets LLC</td></tr></table>
+      <tr><td class="k">Buyer</td><td>${esc(c.contract.buyer)}</td></tr></table>
     <h2>Terms</h2>
-    <table><tr><td class="k">Goods</td><td>Dried fruit, nuts and spices, per monthly purchase orders</td></tr>
-      <tr><td class="k">Estimated annual value</td><td>AED ${money(1200000)}</td></tr>
+    <table><tr><td class="k">Goods / services</td><td>${esc(c.contract.goods)}</td></tr>
+      <tr><td class="k">Estimated annual value</td><td>AED ${money(c.contract.annual_value)}</td></tr>
       <tr><td class="k">Payment terms</td><td>30 days from invoice</td></tr>
       <tr><td class="k">Term</td><td>01 Jan 2026 – 31 Dec 2027</td></tr></table>
     <div class="seal">SPECIMEN<br>SIGNED<br>COPY</div>`),
@@ -247,14 +256,37 @@ function chrome(args) {
   if (r.status !== 0) throw new Error(`chrome failed: ${r.stderr?.slice(0, 300)}`);
 }
 
+/**
+ * Append an incremental update — a new Info dictionary, its own xref section and
+ * a trailer pointing back to the original — exactly what a PDF editor writes when
+ * it re-saves a file. The specimen's edit trail is therefore real file
+ * structure, not a label.
+ */
+function reSaveAsEditor(path, producer, modDate) {
+  const original = readFileSync(path);
+  const text = original.toString("latin1");
+  const size = Number(text.match(/\/Size (\d+)/)[1]);
+  const root = text.match(/\/Root (\d+ \d+ R)/)[1];
+  const created = text.match(/\/CreationDate\s*\(([^)]*)\)/)?.[1] ?? modDate;
+  const prev = Number(text.match(/startxref\s+(\d+)\s+%%EOF\s*$/)[1]);
+  const objOffset = original.length + 1;
+  const obj = `\n${size} 0 obj\n<</Producer (${producer})/Creator (${producer})/CreationDate (${created})/ModDate (${modDate})>>\nendobj\n`;
+  const xrefOffset = original.length + Buffer.byteLength(obj, "latin1");
+  const tail =
+    `xref\n0 1\n0000000000 65535 f \n${size} 1\n${String(objOffset).padStart(10, "0")} 00000 n \n` +
+    `trailer\n<</Size ${size + 1} /Root ${root} /Info ${size} 0 R /Prev ${prev}>>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  writeFileSync(path, Buffer.concat([original, Buffer.from(obj + tail, "latin1")]));
+}
+
 async function render(c, doc, outDir) {
-  const html = T[doc.type](c, doc.truth);
+  const html = T[doc.type](c, doc.truth, doc);
   const htmlPath = join(work, `${c.id}-${doc.id}.html`);
   writeFileSync(htmlPath, html);
   const out = join(outDir, doc.file);
 
   if (doc.render === "pdf") {
     chrome(["--no-pdf-header-footer", "--virtual-time-budget=3000", `--print-to-pdf=${out}`, `file://${htmlPath}`]);
+    if (doc.tamper) reSaveAsEditor(out, doc.tamper.producer, doc.tamper.mod_date);
     return out;
   }
 

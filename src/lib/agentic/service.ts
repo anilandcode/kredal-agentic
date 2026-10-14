@@ -32,8 +32,37 @@ export interface StartedRun {
 
 /** What a stored run keeps — enough to replay the whole view without re-running. */
 function summarise(outcome: RunOutcome) {
-  const { verdicts, advice, accuracy } = outcome;
+  const { verdicts, advice, accuracy, integrity } = outcome;
+  const decisionView = (d: (typeof verdicts.decisions)[number]) => ({
+    id: d.judgment.id,
+    question: d.judgment.question,
+    action: d.action,
+    reason: d.reason,
+    verdict: d.judgment.verdict,
+    probability: d.judgment.probability,
+    rawProbability: d.judgment.rawProbability ?? null,
+    severity: d.judgment.severity,
+    source: d.judgment.source,
+    model: d.judgment.model ?? null,
+    rationale: d.judgment.rationale ?? null,
+    ruleIds: d.judgment.ruleIds,
+  });
   return {
+    integrity: {
+      status: integrity.status,
+      pTamper: integrity.pTamper,
+      summary: integrity.summary,
+      signals: integrity.signals.map((s) => ({
+        id: s.id,
+        question: s.question,
+        verdict: s.verdict,
+        probability: s.probability,
+        source: s.source,
+        model: s.model ?? null,
+        rationale: s.rationale ?? null,
+        evidence: s.evidence.map((e) => e.quote).filter(Boolean) as string[],
+      })),
+    },
     range: {
       expected: verdicts.range.expected,
       low: verdicts.range.low,
@@ -44,20 +73,7 @@ function summarise(outcome: RunOutcome) {
     categoryScores: verdicts.range.asExtracted.categoryScores,
     flags: verdicts.range.asExtracted.flags,
     disagreements: verdicts.disagreements,
-    decisions: verdicts.decisions.map((d) => ({
-      id: d.judgment.id,
-      question: d.judgment.question,
-      action: d.action,
-      reason: d.reason,
-      verdict: d.judgment.verdict,
-      probability: d.judgment.probability,
-      rawProbability: d.judgment.rawProbability ?? null,
-      severity: d.judgment.severity,
-      source: d.judgment.source,
-      model: d.judgment.model ?? null,
-      rationale: d.judgment.rationale ?? null,
-      ruleIds: d.judgment.ruleIds,
-    })),
+    decisions: [integrity.decision, ...verdicts.decisions].map(decisionView),
     questions: verdicts.questions.map((q) => q.judgment.id),
     nextActions: advice.nextActions,
     recovery: advice.recovery,
@@ -135,6 +151,7 @@ export async function startSpecimenRun(opts: StartOptions): Promise<StartedRun> 
         finishedAt: new Date().toISOString(),
         durationMs: log.events.at(-1)?.t ?? null,
         heals: log.events.filter((e) => e.kind === "heal").length,
+        integrity: outcome.integrity.status,
         result: summarise(outcome),
       },
       { merge: true }

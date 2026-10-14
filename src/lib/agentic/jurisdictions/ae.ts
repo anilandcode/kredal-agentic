@@ -46,7 +46,9 @@ export const AE: JurisdictionPack = {
       recognise: "United Arab Emirates identity card; ID number 784-",
       fields: [
         { name: "full_name", description: "Holder's full name" },
-        { name: "id_last4", description: "Last 4 digits of the ID number" },
+        // "Last 4 digits" was read as the last 4 *characters* ("07-7") at 99%
+        // confidence; the hyphens must be spelled out.
+        { name: "id_last4", description: "Last 4 digits of the ID number, digits only — ignore hyphens and spaces" },
         { name: "expiry_date", description: "Expiry date", format: "date" },
       ],
     },

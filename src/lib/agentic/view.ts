@@ -28,7 +28,24 @@ export interface FieldView {
   quote: string | null;
 }
 
+export interface IntegrityView {
+  status: "clear" | "review" | "blocked";
+  pTamper: number;
+  summary: string;
+  signals: {
+    id: string;
+    question: string;
+    verdict: boolean;
+    probability: number;
+    source: "rule" | "model" | "human";
+    model: string | null;
+    rationale: string | null;
+    evidence: string[];
+  }[];
+}
+
 export interface RunSummaryView {
+  integrity?: IntegrityView;
   range: { expected: number; low: number; high: number; pending: string[] };
   risk: "low" | "medium" | "high";
   categoryScores: Record<string, { score: number; max: number; label: string; detail: string }>;
@@ -66,6 +83,7 @@ export interface StoredRun {
   finishedAt?: string;
   durationMs?: number | null;
   heals?: number;
+  integrity?: "clear" | "review" | "blocked";
   error?: string;
   result?: RunSummaryView;
   events: RunEvent[];
