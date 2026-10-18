@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { CaseProfile } from "../assemble";
 import { decide, noisyOr, trustPct, type Decision, type Judgment } from "../decision";
 import type { RunLog } from "../events";
+import { corroboratedDoubt } from "../fraud/corroboration";
 import { describeHistory, readPdfHistory, wasAltered } from "../fraud/pdf-forensics";
 import { screenName, WATCHLIST_NOTICE } from "../fraud/watchlist";
 import type { DocFile } from "./intake";
@@ -133,12 +134,15 @@ export async function inspectIntegrity(
   log.emit("fraud", "stage", "Checking every document for signs of alteration.");
   const signals: Judgment<boolean>[] = [];
   const weights: number[] = [];
+  /** PDFs whose file history shows no re-save — a passed deterministic check. */
+  const cleanHistory = new Set<string>();
 
   // 1. File history, every PDF.
   for (const f of files) {
     const h = readPdfHistory(Buffer.from(f.base64, "base64"));
     if (!h.isPdf) continue;
     const altered = wasAltered(h);
+    if (!altered) cleanHistory.add(f.name);
     if (altered) {
       signals.push({
         id: `integrity.file_history.${f.id}`,
@@ -161,10 +165,11 @@ export async function inspectIntegrity(
     const f = files.find((x) => x.name === e.file);
     const v = (k: string) => money(e.fields[k]?.value);
     const [open, cr, dr, close] = [v("opening_balance"), v("total_credits"), v("total_debits"), v("closing_balance")];
+    let adds = false;
 
     if ([open, cr, dr, close].every(Number.isFinite)) {
       const expected = Math.round((open + cr - dr) * 100) / 100;
-      const adds = Math.abs(expected - close) < 0.01;
+      adds = Math.abs(expected - close) < 0.01;
       signals.push({
         id: `integrity.arithmetic.${e.file}`,
         question: `Do the totals on ${e.file} add up?`,
@@ -190,7 +195,21 @@ export async function inspectIntegrity(
     const seen = await (visual?.get(f.name) ?? inspectVisual(f, log, calibrate));
     if (seen) {
       signals.push(seen.signal);
-      weights.push(seen.weight);
+      const passed = (cleanHistory.has(f.name) ? 1 : 0) + (adds ? 1 : 0);
+      if (seen.signal.verdict && passed > 0) {
+        // Clean visual verdict: an edit it missed must also have slipped past
+        // every deterministic check that passed.
+        const doubt = corroboratedDoubt(seen.weight, passed);
+        log.emit(
+          "fraud",
+          "step",
+          `${f.name}: the model's ${trustPct(seen.weight)} doubt falls to ${trustPct(doubt)} — a missed edit would also have had to pass ${passed} independent check${passed === 1 ? "" : "s"} that came back clean.`,
+          { modelDoubt: seen.weight, corroboratedDoubt: doubt, passedChecks: passed }
+        );
+        weights.push(doubt);
+      } else {
+        weights.push(seen.weight);
+      }
     }
   }
 
